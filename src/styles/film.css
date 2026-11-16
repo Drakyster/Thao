@@ -337,18 +337,30 @@ body {
   margin-left: 0.45em;
   margin-right: -0.87em;
   vertical-align: 0.12em;
+  opacity: 0;
+  animation: sub-more-in 400ms ease 1.1s forwards;
+}
+
+/*
+ * The chevron itself, pulsing on its own layer: one animation per element and
+ * transform/opacity only, so the pulse stays on the compositor (two opacity
+ * animations plus a translate on one element ran on the main thread every frame).
+ */
+.sub__more::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
   border-top: 1.5px solid currentColor;
   border-right: 1.5px solid currentColor;
+  opacity: 0.55;
   transform: rotate(45deg);
-  opacity: 0;
-  animation:
-    sub-more-in 400ms ease 1.1s forwards,
-    sub-more-pulse 1.6s ease-in-out 1.5s infinite;
+  animation: sub-more-pulse 1.6s ease-in-out 1.5s infinite;
 }
 
 @keyframes sub-more-in {
   to {
-    opacity: 0.55;
+    opacity: 1;
   }
 }
 
@@ -356,11 +368,11 @@ body {
   0%,
   100% {
     opacity: 0.55;
-    translate: 0 0;
+    transform: translateX(0) rotate(45deg);
   }
   50% {
     opacity: 0.25;
-    translate: 2px 0;
+    transform: translateX(2px) rotate(45deg);
   }
 }
 
