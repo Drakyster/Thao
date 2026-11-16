@@ -1,0 +1,143 @@
+.sofas__stage {
+  touch-action: none;
+  cursor: grab;
+  outline-offset: -8px;
+}
+
+.sofas__stage[data-phase='merged'],
+.sofas__stage[data-phase='cut'] {
+  cursor: default;
+}
+
+/* the umbrella photo waits, invisible, exactly where the kids will land */
+.sofas__final {
+  opacity: 0;
+}
+
+/*
+ * At the cut it is simply there, under the kids, who dissolve into it eyes
+ * on eyes (Sofas.tsx). The lighting plot (film.css) reads this data-phase to
+ * switch the café's string on at the same moment.
+ */
+.sofas__stage[data-phase='cut'] .sofas__final {
+  opacity: 1;
+}
+
+.sofas__kids,
+.sofas__kid,
+.sofas__layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sofas__img,
+.sofas__glow,
+.sofas__print,
+.sofas__caption,
+.sofas__hint-pos {
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-width: none;
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+
+.sofas__glow {
+  opacity: 0.42;
+  -webkit-mask-image: radial-gradient(closest-side, #000 45%, transparent);
+  mask-image: radial-gradient(closest-side, #000 45%, transparent);
+}
+
+/*
+ * Each child is a small print on the café table: a cream border and a soft
+ * warm shadow, drawn around the photo by its own element (the photo itself
+ * never moves for it). As she brings the two together the border thins away
+ * (--border) and the print settles flat, its shadow closing in (--lift).
+ */
+.sofas__print {
+  --paper: #eadbbf;
+  --border: 4px;
+  --lift: 1;
+  transform-origin: 50% 50%;
+  background: var(--paper);
+  box-shadow:
+    0 0 0 var(--border) var(--paper),
+    0 calc(1px * var(--lift)) calc(2px * var(--lift)) var(--border) rgb(20 9 4 / 0.32),
+    0 calc(14px * var(--lift)) calc(26px * var(--lift)) -2px rgb(26 11 4 / 0.55);
+}
+
+.sofas__caption {
+  margin: 0;
+  text-wrap: balance;
+  /* 'Me, 2009.' keeps its own line; the rest folds only when the print is narrow (never into her caption) */
+  white-space: pre-line;
+}
+
+.sofas__hint {
+  position: absolute;
+  left: -14px;
+  top: -6px;
+  width: 28px;
+  height: 12px;
+}
+
+/* two short strokes leaning toward each other, breathing inward */
+.sofas__mark {
+  position: absolute;
+  top: 5px;
+  width: 9px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: var(--tungsten);
+  left: 0;
+  animation: sofas-in 1.8s var(--ease-in-out) infinite;
+}
+
+.sofas__mark--r {
+  left: auto;
+  right: 0;
+  animation-name: sofas-in-r;
+}
+
+@keyframes sofas-in {
+  0%,
+  100% {
+    transform: translateX(-4px);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translateX(2px);
+    opacity: 1;
+  }
+}
+
+@keyframes sofas-in-r {
+  0%,
+  100% {
+    transform: translateX(4px);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translateX(-2px);
+    opacity: 1;
+  }
+}
+
+/*
+ * The match cut: the bulb under the umbrella flares and both faces stay
+ * readable. Sofas.tsx centres it on the photo's own bulb (umbrella.bulb in
+ * the frame's real rect) and sizes it to the frame; the fallbacks are where
+ * that bulb sits on a 390x844 phone.
+ */
+.scene.sofas .flash {
+  transform-origin: var(--flare-x, 80%) var(--flare-y, 21%);
+  background: radial-gradient(
+    var(--flare-rx, 70%) var(--flare-ry, 42%) at var(--flare-x, 80%) var(--flare-y, 21%),
+    rgb(255 226 168 / 0.95) 0%,
+    rgb(255 214 150 / 0.6) 22%,
+    rgb(240 150 60 / 0.24) 50%,
+    transparent 78%
+  );
+}

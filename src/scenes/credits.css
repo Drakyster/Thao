@@ -1,0 +1,705 @@
+/*
+ * The credits play with the house lights down (the lighting plot in film.css
+ * keeps the room at 0.32 for the roll, then brings the café's string back on
+ * over the poster). Roles in filament amber, names in cream. The poster is an
+ * espresso sheet with a brass hairline, and 'Wink back ;)' is the film's one
+ * solid amber button (film.css), so the last thing that glows is her reply.
+ */
+
+/* ───────────── the roll ───────────── */
+
+/* the roll fills everything above the bar (the subtitle row is silent meanwhile) */
+.credits__roll {
+  position: absolute;
+  inset: 0;
+  grid-row: 1 / 4;
+  grid-column: 1 / 2;
+  z-index: 1;
+  max-height: none;
+  overflow: hidden;
+}
+
+/* names fade in and out at the edges like light falling off: a mask, never a band of black over the room */
+.roll__view,
+.credits__roll.is-static .roll__scroller {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 15%, #000 85%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 15%, #000 85%, transparent 100%);
+}
+
+.roll__view {
+  position: absolute;
+  inset: 0;
+}
+
+.roll__col {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* ~320px: wide enough for the longest one-line names at 22px */
+  width: min(20.5rem, 100% - 2 * var(--gutter));
+  margin: 0 auto;
+  text-align: center;
+  /* parked just below the frame until the roll is measured (the first keyframe is the same place) */
+  transform: translate3d(0, 100cqh, 0);
+  will-change: transform;
+}
+
+.roll__list {
+  display: grid;
+  gap: 2rem;
+}
+
+.roll__item {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.roll__role {
+  font-family: var(--font-credit);
+  font-weight: 500;
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  letter-spacing: 0.2em;
+  /* tracking also pads the end of the word: pad the start the same so it stays centred */
+  padding-left: 0.2em;
+  text-transform: uppercase;
+  color: var(--tungsten);
+}
+
+.roll__name {
+  font-family: var(--font-title);
+  font-optical-sizing: auto;
+  font-weight: 330;
+  font-size: clamp(1.3125rem, 1.2rem + 0.3vw, 1.375rem);
+  line-height: 1.25;
+  color: var(--white);
+  text-wrap: balance;
+}
+
+/*
+ * The last card arrives alone: everything above it has rolled off by the time
+ * it is centred (half a frame of dark above it, so not even a ghost of the
+ * last name lingers at the top edge while it holds).
+ */
+.roll__last {
+  margin-top: max(7rem, 50cqh);
+  font-family: var(--font-title);
+  font-optical-sizing: auto;
+  font-style: italic;
+  font-weight: 330;
+  font-size: clamp(1.3125rem, 1.2rem + 0.3vw, 1.375rem);
+  line-height: 1.3;
+  color: var(--white);
+  text-wrap: balance;
+}
+
+/* the whole roll is one quiet pause button, for a finger or a mouse (the bar's toggle is the same control for a keyboard) */
+.roll__tap {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  cursor: pointer;
+  /* a quick pause and play is never a double-tap zoom */
+  touch-action: manipulation;
+}
+
+/*
+ * The roll's one pause / play toggle, in the bar for the whole roll. While the
+ * credits roll it stays out of sight (a tap anywhere pauses them), unless the
+ * keyboard is on it; paused, it is the round play button: the state, and a
+ * visible way to go on.
+ */
+.credits__toggle {
+  width: 44px;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.credits__toggle.is-paused {
+  opacity: 1;
+  pointer-events: auto;
+  transition:
+    opacity 250ms ease,
+    transform 160ms var(--ease-out),
+    background-color 200ms ease,
+    box-shadow 200ms ease,
+    color 200ms ease;
+}
+
+/* a rule of its own: a browser without :focus-visible drops only this one */
+.credits__toggle:focus-visible {
+  opacity: 1;
+}
+
+/* two bars while the credits roll */
+.credits__toggle-icon {
+  width: 10px;
+  height: 12px;
+  border-left: 3px solid var(--white);
+  border-right: 3px solid var(--white);
+}
+
+/* a triangle while they wait */
+.credits__toggle.is-paused .credits__toggle-icon {
+  border: 0;
+  /* a triangle's visual centre sits left of its box centre */
+  margin-left: 2px;
+  background: var(--white);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+/* reduced motion: the same credits, standing still, scrolling inside the frame if they must */
+.credits__roll.is-static .roll__scroller {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: clamp(3.5rem, 13cqh, 6rem) var(--gutter);
+  outline-offset: -8px;
+}
+
+.credits__roll.is-static .roll__col {
+  position: static;
+  width: min(20.5rem, 100%);
+  /* centred while it fits; auto margins fall to 0 when it scrolls, so the top stays reachable */
+  margin: auto;
+  transform: none;
+  will-change: auto;
+}
+
+.credits__roll.is-static .roll__last {
+  margin-top: 3.5rem;
+}
+
+/* no container units on iOS 15: the same room from the screen (the roll's frame is the screen minus the 4rem bar) */
+@supports not (width: 1cqw) {
+  .roll__col {
+    transform: translate3d(0, 100vh, 0);
+  }
+
+  .roll__last {
+    margin-top: max(7rem, 50vh - 2rem);
+  }
+
+  .credits__roll.is-static .roll__scroller {
+    padding: clamp(3.5rem, 13vh - 0.5rem, 6rem) var(--gutter);
+  }
+}
+
+/* ───────────── the poster ───────────── */
+
+/* the sheet hangs low, under the café's string, with the keep line at its foot */
+.credits__stack {
+  /* in front of his line, the ;) and the buttons: grown, it covers their rows, and they come back from under it */
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  align-self: end;
+  /* the keepsake's fit (Credits.tsx) scales the stack from its top-left corner */
+  transform-origin: 0 0;
+  transition: transform 600ms var(--ease-film);
+}
+
+.poster-wrap {
+  position: relative;
+}
+
+/* the photo's own light, spilling around the photo part of the sheet */
+.poster-wrap__glow {
+  position: absolute;
+  left: -14%;
+  top: 16%;
+  width: 128%;
+  height: 92%;
+  max-width: none;
+  object-fit: fill;
+  opacity: 0.3;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(closest-side, #000 50%, transparent);
+  mask-image: radial-gradient(closest-side, #000 50%, transparent);
+}
+
+/*
+ * height = min(available height, 16/9 × available width); everything inside
+ * is sized in cqw, so the sheet scales like a printed one.
+ */
+.poster {
+  /* room for the caption under the sheet */
+  --cap: 1.75rem;
+  /* room left above the sheet for the café's string, so it never cuts a bulb */
+  --string: 56px;
+  position: relative;
+  /* no container units on iOS 15: sized from the screen there (the picture is about the screen minus 11rem) */
+  width: min(100vw - 2 * var(--gutter), (100dvh - 11rem - var(--cap) - var(--string)) * 9 / 16);
+  aspect-ratio: 9 / 16;
+  container-type: inline-size;
+  overflow: hidden;
+  /* an espresso sheet: a brass hairline for its printed edge, lifted off the café's wall */
+  background: var(--night);
+  box-shadow:
+    0 0 0 1px rgb(167 121 79 / 0.3),
+    0 28px 60px -22px rgb(0 0 0 / 0.85);
+}
+
+/*
+ * Gated rather than written after a fallback line: iOS 15 accepts this one when
+ * it parses it (it holds var()), drops it once computed, and the sheet is 0×0.
+ */
+@supports (width: 1cqw) {
+  .poster {
+    width: min(100cqw - 2 * var(--gutter), (100cqh - var(--cap) - var(--string)) * 9 / 16);
+  }
+}
+
+/*
+ * A wide screen's string hangs lower (its middle bulbs reach 100px), so the
+ * sheet leaves it more room. The iOS 15 width and --u below read the same
+ * var(--string), so they follow without a copy.
+ */
+@media (min-width: 700px) {
+  .poster {
+    --string: 80px;
+  }
+}
+
+/* tap the sheet for a clean screenshot (a real button over it, so a keyboard can too) */
+.poster__tap {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 0;
+  cursor: pointer;
+  transition: box-shadow 200ms ease;
+}
+
+/* a mouse finds it: the brass hairline warms to amber */
+@media (hover: hover) and (pointer: fine) {
+  .poster__tap:hover {
+    box-shadow: 0 0 0 1px rgb(242 162 58 / 0.6);
+  }
+}
+
+/* photo 1 at native 3:4, full width: nothing cropped, she keeps the right edge */
+.poster__photo {
+  position: absolute;
+  left: 0;
+  top: 17%;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+}
+
+.poster__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/*
+ * The photo's black sky (and the top of the tower) melts into the poster's
+ * night. It starts 2px above the photo: scaled up for the keepsake, the
+ * photo's first row of pixels would otherwise peek out over it as a line.
+ */
+.poster__photo::after {
+  content: '';
+  position: absolute;
+  inset: -2px 0 auto;
+  height: calc(16% + 2px);
+  background: linear-gradient(to bottom, var(--night) 8%, transparent);
+}
+
+/* espresso night rising from the foot of the sheet, under the title block */
+.poster__fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 44%;
+  background: linear-gradient(
+    to top,
+    var(--night) 0%,
+    var(--night) 30%,
+    rgb(13 7 5 / 0.86) 46%,
+    rgb(13 7 5 / 0.55) 64%,
+    rgb(13 7 5 / 0.22) 82%,
+    transparent
+  );
+}
+
+.poster__top {
+  position: absolute;
+  top: 9cqw;
+  left: 8cqw;
+  right: 8cqw;
+  display: grid;
+  justify-items: center;
+  gap: 2.4cqw;
+  text-align: center;
+}
+
+.poster__presents {
+  font-family: var(--font-credit);
+  font-weight: 300;
+  font-size: 3cqw;
+  line-height: 1.2;
+  letter-spacing: 0.32em;
+  padding-left: 0.32em;
+  text-transform: uppercase;
+  color: rgb(252 239 217 / 0.82);
+}
+
+.poster__tagline {
+  font-family: var(--font-title);
+  font-optical-sizing: auto;
+  font-style: italic;
+  font-weight: 330;
+  font-size: 5.2cqw;
+  line-height: 1.15;
+  color: var(--white);
+}
+
+.poster__bottom {
+  position: absolute;
+  left: 6cqw;
+  right: 6cqw;
+  bottom: 7.5cqw;
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+
+.poster__title {
+  font-family: var(--font-title);
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-size: 17cqw;
+  line-height: 0.9;
+  letter-spacing: 0.2em;
+  /* tracking pads the last letter too: pull it back so the word stays centred */
+  margin-right: -0.2em;
+  text-transform: uppercase;
+  color: var(--white);
+  /* the title catches the bulbs */
+  text-shadow: 0 0 30px rgb(255 166 72 / 0.32);
+}
+
+/*
+ * The O that winks back when she does (a transform needs a box). A box of its
+ * own loses the A–O kerning pair, so the O takes that 0.044em back: the word
+ * sets exactly as it did as plain text.
+ */
+.poster__o {
+  display: inline-block;
+  margin-left: -0.044em;
+  transform-origin: 50% 50%;
+}
+
+/* the award as type only, between two short hairlines */
+.poster__award {
+  margin-top: 3.6cqw;
+  display: flex;
+  align-items: center;
+  gap: 2.6cqw;
+  font-family: var(--font-credit);
+  font-weight: 500;
+  font-size: 2.9cqw;
+  line-height: 1;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+.poster__award::before,
+.poster__award::after {
+  content: '';
+  width: 7cqw;
+  height: 1px;
+  background: var(--canvas);
+}
+
+.poster__award::after {
+  /* the tracking after the last letter already adds space on this side */
+  margin-left: -0.3em;
+}
+
+/* the billing block: wide spaces between credits, small roles, taller names */
+.poster__billing {
+  margin-top: 5.2cqw;
+  max-width: 86cqw;
+  font-family: var(--font-credit);
+  font-weight: 300;
+  font-size: max(6px, 2.45cqw);
+  line-height: 1.25;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--sand);
+  text-wrap: balance;
+}
+
+.poster__bill {
+  display: inline-block;
+  margin: 0 0.5em;
+}
+
+.poster__bill-role {
+  font-size: 0.78em;
+}
+
+.poster__release {
+  margin-top: 4.2cqw;
+  font-family: var(--font-credit);
+  font-weight: 500;
+  font-size: 2.7cqw;
+  line-height: 1;
+  letter-spacing: 0.28em;
+  padding-left: 0.28em;
+  text-transform: uppercase;
+  color: var(--tungsten);
+}
+
+/*
+ * iOS 15 drops every cqw size above, and the type would pile up at the top of
+ * the sheet. There, --u stands in for 1cqw: a hundredth of the sheet's width,
+ * the same sum as its default width. Only engines without container units
+ * ever see --u, so it is never declared in cq units.
+ */
+@supports not (width: 1cqw) {
+  .poster {
+    --u: calc(min(100vw - 2 * var(--gutter), (100dvh - 11rem - var(--cap) - var(--string)) * 9 / 16) / 100);
+  }
+
+  .poster__top {
+    top: calc(9 * var(--u));
+    left: calc(8 * var(--u));
+    right: calc(8 * var(--u));
+    gap: calc(2.4 * var(--u));
+  }
+
+  .poster__presents {
+    font-size: calc(3 * var(--u));
+  }
+
+  .poster__tagline {
+    font-size: calc(5.2 * var(--u));
+  }
+
+  .poster__bottom {
+    left: calc(6 * var(--u));
+    right: calc(6 * var(--u));
+    bottom: calc(7.5 * var(--u));
+  }
+
+  .poster__title {
+    font-size: calc(17 * var(--u));
+  }
+
+  .poster__award {
+    margin-top: calc(3.6 * var(--u));
+    gap: calc(2.6 * var(--u));
+    font-size: calc(2.9 * var(--u));
+  }
+
+  .poster__award::before,
+  .poster__award::after {
+    width: calc(7 * var(--u));
+  }
+
+  .poster__billing {
+    margin-top: calc(5.2 * var(--u));
+    max-width: calc(86 * var(--u));
+    font-size: max(6px, calc(2.45 * var(--u)));
+  }
+
+  .poster__release {
+    margin-top: calc(4.2 * var(--u));
+    font-size: calc(2.7 * var(--u));
+  }
+}
+
+/* the keep line, and in the same place "Screenshot now." once she taps the sheet */
+.credits__keep {
+  display: grid;
+  text-align: center;
+}
+
+.credits__keep > span {
+  grid-area: 1 / 1;
+  transition: opacity 220ms ease;
+}
+
+.credits__keep > .is-off {
+  opacity: 0;
+}
+
+.credits__now {
+  color: var(--white);
+}
+
+/* ───────────── under the poster ───────────── */
+
+/* his line sits at the top of the subtitle row, leaving the second line for the wink */
+.credits.is-poster .subs {
+  align-items: start;
+}
+
+/*
+ * The wink, as text she can select and copy by hand, on the subtitle row's
+ * second line. (An absolute grid child needs both lines: an `auto` end would
+ * stretch its box to the bottom of the scene.)
+ */
+.credits__wink {
+  position: absolute;
+  grid-row: 3 / 4;
+  grid-column: 1 / 2;
+  left: 0;
+  right: 0;
+  bottom: 0.25rem;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 0 0.5rem;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--step-sub);
+  line-height: 1.35;
+  color: var(--sub);
+  text-shadow:
+    0 1px 1px rgb(10 5 2 / 0.95),
+    0 0 14px rgb(10 5 2 / 0.75);
+  cursor: text;
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
+/* on a wide screen the buttons line up with the poster's edges instead of the window's */
+.credits.is-poster .bar {
+  justify-self: center;
+  width: min(100%, max(var(--poster-w, 0px) + 2 * var(--gutter), 24rem));
+}
+
+.credits a.btn {
+  text-decoration: none;
+}
+
+/* ───────────── the keepsake: everything but the poster steps aside ───────────── */
+
+/* back from the clean screenshot, his line waits for the shrinking sheet to uncover it */
+.credits .subs {
+  transition: opacity 600ms var(--ease-film) 250ms;
+}
+
+.credits.is-clean .subs {
+  opacity: 0;
+  transition-duration: 300ms;
+  transition-delay: 0s;
+}
+
+/*
+ * Alone, the sheet grows to the largest 9:16 that fits in .credits__band,
+ * centred there: the bulbs crown it and the screenshot is all poster.
+ * Credits.tsx measures the sheet and the band and writes the translate and
+ * the scale (the type inside is in cqw of the sheet, so it scales with it).
+ * It waits for his line and the ;) to fade (300ms), so "Screenshot now."
+ * never slides through them.
+ */
+.credits.is-clean .credits__stack {
+  transform: translate(var(--keep-x), var(--keep-y)) scale(var(--keep-s));
+  transition-delay: 300ms;
+}
+
+/* the brass hairline stays one pixel once grown (the sheet's edges land on whole device pixels), so it prints sharp */
+.credits.is-clean .poster {
+  box-shadow:
+    0 0 0 calc(1px / var(--keep-s, 1)) rgb(167 121 79 / 0.3),
+    0 28px 60px -22px rgb(0 0 0 / 0.85);
+}
+
+/*
+ * Reduced motion: nothing moves. Credits.tsx only writes the fit once the cue
+ * has had its second, and the sheet cuts to its keepsake size as the cue
+ * finishes fading (300ms); it cuts back the same way.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .credits__stack {
+    transition: none;
+  }
+
+  .credits.is-clean .credits__stack {
+    transition: transform 0s 300ms;
+  }
+}
+
+/*
+ * The cue rides on the growing sheet. Where the grown sheet leaves it no room
+ * under it (Credits.tsx sets data-cue, and --cue-gone: when it must be gone),
+ * it dissolves on the way instead of sliding off the bottom edge.
+ */
+.credits__stack[data-cue='fade'] .credits__now:not(.is-off) {
+  animation: credits-cue-out 240ms linear calc(var(--cue-gone) - 240ms) forwards;
+}
+
+@keyframes credits-cue-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* when the cue ends, the keep line fades out as one: its first words never ghost back in under the sheet */
+.credits.is-clean .credits__keep > span:not(.credits__now) {
+  opacity: 0;
+}
+
+.credits.is-clean .credits__wink {
+  pointer-events: none;
+}
+
+/* the screenshot keeps no focus ring either (any key brings everything back) */
+.credits.is-clean .poster__tap {
+  outline-color: transparent;
+}
+
+/* the film's progress filament is UI too: off while she keeps the poster */
+.stage:has(.scene.credits) .progress {
+  transition: opacity 600ms var(--ease-film);
+}
+
+.stage:has(.scene.credits.is-clean) .progress {
+  opacity: 0;
+  transition-duration: 300ms;
+}
+
+/* while the poster is alone, any tap brings everything back */
+.credits__catch {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  cursor: pointer;
+}
+
+/*
+ * Where the sheet may grow while it is alone (Credits.tsx measures this box,
+ * nothing draws it): the gutters on each side, a small margin above the foot
+ * of the screen, and under the café's string. The string's lowest disc
+ * (film.css .stage::after) reaches 78px down on a phone and 100px on a wide
+ * screen, and sways a pixel lower: the sheet stops just under it, never on it.
+ */
+.credits__band {
+  position: absolute;
+  top: max(56px + var(--safe-top), 80px);
+  right: calc(var(--gutter) + var(--safe-right));
+  bottom: calc(24px + var(--safe-bottom));
+  left: calc(var(--gutter) + var(--safe-left));
+  pointer-events: none;
+}
+
+@media (min-width: 700px) {
+  .credits__band {
+    top: max(56px + var(--safe-top), 102px);
+  }
+}

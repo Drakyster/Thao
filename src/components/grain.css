@@ -1,0 +1,41 @@
+/*
+ * A little larger than the screen, so its jitter (±4% of its own size) never
+ * shows an edge, and no larger: a layer twice the screen held tens of MB of
+ * GPU memory for the whole film.
+ */
+.grain {
+  position: fixed;
+  inset: -10%;
+  z-index: 40;
+  pointer-events: none;
+  background-size: 160px 160px;
+  opacity: var(--grain, 0.4);
+  animation:
+    grain-in 0.9s ease-out both,
+    grain-jump 0.66s steps(1, end) infinite;
+  will-change: transform;
+}
+
+@keyframes grain-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes grain-jump {
+  0% { transform: translate3d(0, 0, 0); }
+  12.5% { transform: translate3d(-3%, 2%, 0); }
+  25% { transform: translate3d(2%, -4%, 0); }
+  37.5% { transform: translate3d(-4%, -1%, 0); }
+  50% { transform: translate3d(4%, 3%, 0); }
+  62.5% { transform: translate3d(-1%, 4%, 0); }
+  75% { transform: translate3d(3%, -2%, 0); }
+  87.5% { transform: translate3d(-2%, -3%, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain {
+    animation: none;
+  }
+}

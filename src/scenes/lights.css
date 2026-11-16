@@ -1,0 +1,255 @@
+/* ───────────── the switch: the whole picture, while the bulb is cold ───────────── */
+
+/* how far down the picture the bulb hangs (its ember on the room is centred on the same point) */
+.lights__stage {
+  --lamp-y: 58%;
+}
+
+/* holdable while tabindex is 0 (the lighting plot in film.css keys off the same hook) */
+.lights__stage[tabindex='0'] {
+  touch-action: none;
+  cursor: pointer;
+}
+
+.lights__stage:focus-visible {
+  outline-offset: -8px;
+  border-radius: 12px;
+}
+
+/* once lit it is no longer a control: keyboard focus stays on it, but no ring around the title card */
+.lights__stage:not([tabindex='0']) {
+  outline: none;
+}
+
+/*
+ * The cold filament breathes a faint ember onto the room around it, centred
+ * on the lamp (--lamp-y, see .lights__lamp). It comes up with the bulb (0.9s
+ * in), then breathes.
+ */
+.lights__stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle 150px at 50% var(--lamp-y), rgb(226 104 32 / 0.3), rgb(170 64 18 / 0.13) 38%, rgb(120 40 10 / 0.04) 70%, transparent);
+  animation:
+    lights-ember-in 1.2s var(--ease-film) 0.9s both,
+    lamp-ember 2.8s ease-in-out 2.1s infinite;
+  transition: opacity 0.6s var(--ease-film);
+}
+
+/* once lit, the ember is not needed: the light is real */
+.lights__stage:not([tabindex='0'])::before {
+  opacity: 0;
+  animation: none;
+}
+
+@keyframes lights-ember-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.55;
+  }
+}
+
+/* ───────────── hello ───────────── */
+
+.lights__hello {
+  position: absolute;
+  top: clamp(1.5rem, 9vh, 6rem);
+  left: var(--gutter);
+  right: var(--gutter);
+  max-width: 34rem;
+  margin: 0 auto;
+}
+
+.lights__hi {
+  font-style: italic;
+  font-weight: 330;
+  /* the longest greeting ('Welcome back, Thao.', about 7.8em wide) stays on one line, down to a 320px phone */
+  font-size: min(var(--step-3), (100vw - 2 * var(--gutter)) / 8);
+  letter-spacing: -0.01em;
+  text-shadow: 0 0 28px rgb(255 166 72 / 0.22);
+}
+
+/* a wide screen: the greeting may run past the intro's measure instead of breaking (there is room on either side) */
+@media (min-width: 700px) {
+  .lights__hi {
+    white-space: nowrap;
+  }
+}
+
+.lights__intro {
+  margin-top: 0.6rem;
+  font-size: var(--step-0);
+  color: var(--sand);
+}
+
+.lights__runtime {
+  margin-top: 0.25rem;
+  font-size: var(--step--1);
+  color: rgb(214 180 139 / 0.8);
+}
+
+/* ───────────── the lamp (the café bulb: Lamp.tsx, and its glass and wire in film.css) ───────────── */
+
+.lights__lamp {
+  position: absolute;
+  left: 50%;
+  top: var(--lamp-y);
+  width: 0;
+  height: 0;
+}
+
+/*
+ * The wire runs up from the socket's dome (31px above the bulb's centre) into
+ * the dark, and stops short of the greeting's last line: Lights.tsx measures
+ * the room between them (--wire, at most the 113px film.css draws).
+ */
+.lights__stage .lights__lamp::after {
+  top: calc(-31px - var(--wire, 113px));
+  height: var(--wire, 113px);
+}
+
+/* a short screen (the smallest iPhones, or Instagram's browser on an SE): the bulb hangs a little lower */
+@media (max-height: 600px) {
+  .lights__stage {
+    --lamp-y: 66%;
+  }
+}
+
+/* a slow breath around the cold filament, so it reads as "touch me" */
+.lights__breath {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  left: -28px;
+  top: -28px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgb(242 162 58 / 0.45);
+  animation: lamp-breath 2.8s var(--ease-out) infinite;
+  pointer-events: none;
+}
+
+@keyframes lamp-breath {
+  0% {
+    transform: scale(0.55);
+    opacity: 0;
+  }
+  35% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+/* ───────────── the bloom ───────────── */
+
+/*
+ * It radiates from the bulb she holds: a warm centre, dark edges, never a white-out (Lights.tsx caps it at 0.75).
+ * Two layers, so it never fades through khaki: an amber field with no cream in it (cream at part opacity
+ * over the espresso room loses its colour faster than the amber around it), and the bulb's white-hot heart
+ * (::after), which only burns while the flare rises and is gone early in the fall.
+ */
+.scene.lights .flash {
+  background: radial-gradient(78% 50% at 50% 50%, #ffc070 0%, #fbb058 20%, rgb(244 156 62 / 0.8) 42%, rgb(150 66 22 / 0.4) 70%, rgb(30 12 5 / 0) 100%);
+}
+
+.scene.lights .flash::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(36% 24% at 50% 50%, rgb(255 238 204 / 0.9), rgb(255 214 150 / 0.35) 50%, rgb(255 200 130 / 0));
+  opacity: 0;
+}
+
+/* the heart holds through the 0.45 s rise (Lights.tsx), then goes while the field is still near its peak */
+.scene.lights[data-phase='bloom'] .flash::after {
+  animation: lights-core 0.8s linear;
+}
+
+@keyframes lights-core {
+  0%,
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* a wide screen: the same flare (and its heart) stays round around the bulb instead of stretching into a band */
+@media (min-aspect-ratio: 1/1) {
+  .scene.lights .flash {
+    background: radial-gradient(42% 66% at 50% 50%, #ffc070 0%, #fbb058 20%, rgb(244 156 62 / 0.8) 42%, rgb(150 66 22 / 0.4) 70%, rgb(30 12 5 / 0) 100%);
+  }
+
+  .scene.lights .flash::after {
+    background: radial-gradient(19% 32% at 50% 50%, rgb(255 238 204 / 0.9), rgb(255 214 150 / 0.35) 50%, rgb(255 200 130 / 0));
+  }
+}
+
+/* ───────────── the title card: THAO stands alone in the light she made ───────────── */
+
+/* the afterglow of her bulb, behind the title (the scene's own practical light) */
+.scene.lights::before {
+  background: radial-gradient(78% 30% at 50% 45%, rgb(255 168 76 / 0.26), rgb(222 112 40 / 0.1) 48%, transparent 80%);
+}
+
+.scene.lights[data-phase='title']::before {
+  opacity: 1;
+  transition-duration: 2.2s;
+}
+
+.lights__title {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  gap: 1rem;
+  pointer-events: none;
+}
+
+.lights__name {
+  font-weight: 300;
+  font-size: var(--step-4);
+  letter-spacing: 0.3em;
+  /* tracking also adds space after the last letter: pull it back so the word stays centred */
+  margin-right: -0.3em;
+  line-height: 1.2;
+  text-shadow: 0 0 34px rgb(255 166 72 / 0.42);
+}
+
+/* each letter drifts to its place as the tracking closes in */
+.lights__letter {
+  display: inline-block;
+}
+
+.lights__byline {
+  font-family: var(--font-title);
+  font-style: italic;
+  font-size: var(--step-0);
+  color: var(--sand);
+}
+
+/* ───────────── reduced motion: the light still comes up, nothing breathes ───────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .lights__stage::before {
+    animation: none;
+    opacity: 0.8;
+  }
+
+  .lights__breath {
+    animation: none;
+  }
+
+  /* the reduced bloom is one short amber pulse (Lights.tsx): no white-hot heart lingering past its peak */
+  .scene.lights[data-phase='bloom'] .flash::after {
+    animation: none;
+  }
+}

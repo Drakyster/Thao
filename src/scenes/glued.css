@@ -1,0 +1,320 @@
+/*
+ * Scene 6, "Glued": photo 2 in the shared frame, cut where their heads meet.
+ * Each half is a full copy of the photo clipped at the join and moved with
+ * a transform, and carries its own share of the print's grade.
+ * --join, --bulb-x and --bulb-y come from photos.ts.
+ * The café is lit (room 0.66, string 0.9: the lighting plot in film.css).
+ */
+
+/* everything that goes dark when she leaves, all but the bulb, and its soft edges (the masks are at the end) */
+.glued__soft,
+.glued__print {
+  position: absolute;
+  inset: 0;
+}
+
+/* the night shows through the gap when the halves part: a warm near-black, so the seam's light reads (graded like the print around it) */
+.glued__night {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgb(255 186 110 / 0.1) 0%, rgb(255 186 110 / 0) 14%, transparent 68%, rgb(14 6 3 / 0.3) 100%),
+    radial-gradient(130% 90% at 50% 40%, transparent 62%, rgb(14 6 3 / 0.3) 100%),
+    #120905;
+}
+
+/*
+ * A half is frame-sized and clips itself (its clip-path moves with it), so
+ * at rest the two halves are exactly the framed photo, and pulled apart
+ * they slide out whole past the frame's edges.
+ */
+.glued__half {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+/* his half runs 1px past the join, under hers, so no hairline of night shows at rest */
+.glued__half--his {
+  clip-path: inset(0 calc((1 - var(--join)) * 100% - 1px) 0 0);
+}
+
+.glued__half--her {
+  clip-path: inset(0 0 0 calc(var(--join) * 100%));
+}
+
+.glued__photo {
+  position: absolute;
+  inset: 0;
+}
+
+/*
+ * The shared slow push-in, run inside both halves at once so they stay in
+ * register. It creeps toward the umbrella's bulb, so the bulb holds still:
+ * it is the light that stays when she goes on, where SameLight's lamp hangs.
+ */
+.glued__photo.is-pushing {
+  transform-origin: calc(var(--bulb-x) * 100%) calc(var(--bulb-y) * 100%);
+  animation: push-in 14s linear forwards;
+}
+
+/*
+ * The print's grade (film.css draws it on the frame: a warm graze on top, the
+ * foot and corners in shade) travels with the halves here. On the frame, which
+ * stays put, a half pulled past the frame's side had no shade out there: a hard
+ * edge ran down his T-shirt on short screens and desktop.
+ */
+.scene.glued .glued__frame::after {
+  content: none;
+}
+
+/*
+ * The same two gradients, placed on the half as they were on the frame and cut
+ * by its clip. They are clear from 14% to 68% down, so only the warm top and
+ * the shaded foot (the corners' shade lies in it too) are drawn, each its own
+ * thin layer: the two halves then hold about the memory of the frame's one
+ * grade, not twice it.
+ */
+.glued__half::before,
+.glued__half::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+/* the warm graze; z-index puts it over the photo (a ::before paints under it otherwise) */
+.glued__half::before {
+  z-index: 1;
+  top: 0;
+  height: 14%;
+  background: linear-gradient(to bottom, rgb(255 186 110 / 0.1), rgb(255 186 110 / 0));
+}
+
+/* the shaded foot, the corners' ellipse re-anchored to the band (centre 40% of the frame down, 90% tall) */
+.glued__half::after {
+  top: 68%;
+  bottom: 0;
+  background:
+    linear-gradient(to bottom, transparent, rgb(14 6 3 / 0.3)),
+    radial-gradient(130% 281.25% at 50% -87.5%, transparent 62%, rgb(14 6 3 / 0.3) 100%);
+}
+
+/* ───────────── the light in the gap ───────────── */
+
+.glued__halo,
+.glued__seam {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--join) * 100%);
+  opacity: 0;
+  pointer-events: none;
+  /* the print's shaded foot still falls on them, as when the frame drew the grade over everything */
+  -webkit-mask-image: linear-gradient(to bottom, #000 68%, rgb(0 0 0 / 0.7));
+  mask-image: linear-gradient(to bottom, #000 68%, rgb(0 0 0 / 0.7));
+}
+
+/* warm falloff that spills onto the cut edges */
+.glued__halo {
+  width: 96px;
+  margin-left: -48px;
+  background: radial-gradient(closest-side, rgb(242 162 58 / 0.38), transparent);
+}
+
+/* the crack of light itself: tungsten at the ends, cream-hot in the middle */
+.glued__seam {
+  width: 2px;
+  margin-left: -1px;
+  background: linear-gradient(
+    to bottom,
+    transparent 3%,
+    var(--tungsten) 16%,
+    var(--white) 44%,
+    var(--white) 56%,
+    var(--tungsten) 80%,
+    transparent 93%
+  );
+}
+
+/* ───────────── the bulb under the umbrella ───────────── */
+
+/* a soft warm highlight on the hottest bulb; its opacity flickers on impact */
+.glued__bulb {
+  position: absolute;
+  left: calc(var(--bulb-x) * 100%);
+  top: calc(var(--bulb-y) * 100%);
+  width: 32%;
+  aspect-ratio: 1;
+  /* % margins are fractions of the width, so this centres the square on the bulb */
+  margin: -16% 0 0 -16%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 238 196 / 0.42), rgb(234 154 26 / 0.16) 55%, transparent);
+  pointer-events: none;
+}
+
+/* the dip: the same spot, darkened toward a cooling filament (ember), only visible while it flickers */
+.glued__bulb--dim {
+  opacity: 0;
+  background: radial-gradient(
+    closest-side,
+    rgb(52 24 10 / 0.52),
+    rgb(52 24 10 / 0.2) 58%,
+    transparent
+  );
+}
+
+/* ───────────── the hint and the drag surface ───────────── */
+
+/* "Drag sideways.": small, in cream, on a deep shadow at the foot of the picture so it reads on the photo */
+.glued__hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 26%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: clamp(0.75rem, 5%, 1.5rem);
+  background: linear-gradient(to top, rgb(13 7 5 / 0.82), rgb(13 7 5 / 0.38) 52%, transparent);
+  pointer-events: none;
+}
+
+.glued__hint p {
+  font-size: var(--step--1);
+  letter-spacing: 0.02em;
+  /* cream (--white) as the foot's shade left it when the grade lay over the hint; it lies under it now */
+  color: rgb(194 182 165);
+  text-shadow:
+    0 1px 2px rgb(10 5 2 / 0.9),
+    0 0 10px rgb(10 5 2 / 0.6);
+}
+
+/* the whole picture is the handle; sideways only, so nothing here scrolls or zooms */
+.glued__grip {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  cursor: grab;
+}
+
+.glued__grip:active {
+  cursor: grabbing;
+}
+
+.glued__grip:focus-visible {
+  outline: 2px solid var(--tungsten);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+/* ───────────── the leave: the café goes dark, all but the umbrella's bulb ───────────── */
+
+/*
+ * Glued.tsx drives --reach (the radius of the light that stays, in % of the
+ * frame: from past the far corner down to the bulb) and, with reduced
+ * motion, --fade (how much of the rest of the photo is left). The light
+ * closes on photos.ts umbrella.bulb, where SameLight's cold lamp hangs.
+ */
+.glued.is-leaving .glued__print {
+  -webkit-mask-image: radial-gradient(
+    calc(var(--reach) * 1%) calc(var(--reach) * 1%) at calc(var(--bulb-x) * 100%) calc(var(--bulb-y) * 100%),
+    #000 60%,
+    rgb(0 0 0 / var(--fade))
+  );
+  mask-image: radial-gradient(
+    calc(var(--reach) * 1%) calc(var(--reach) * 1%) at calc(var(--bulb-x) * 100%) calc(var(--bulb-y) * 100%),
+    #000 60%,
+    rgb(0 0 0 / var(--fade))
+  );
+}
+
+/*
+ * Meanwhile the print's edges go soft, by --edge (0 to 1, from Glued.tsx, on
+ * the frame), or the half-dark photo shows as a box with hard edges. The top
+ * feather stops just above the bulb (8% down), so the light still closes on
+ * the bulb. On the wrapper, not the print: this mask holds still while the
+ * light moves, so it isn't redrawn on every frame. The grade rides on the
+ * halves, inside it, so its warm top and shaded foot get the same feather.
+ */
+.glued.is-leaving .glued__soft {
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent, #000 calc(var(--edge, 0) * (var(--bulb-y) * 100% - 1%)), #000 calc(100% - var(--edge, 0) * 14%), transparent),
+    linear-gradient(to right, transparent, #000 calc(var(--edge, 0) * 14%), #000 calc(100% - var(--edge, 0) * 14%), transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, transparent, #000 calc(var(--edge, 0) * (var(--bulb-y) * 100% - 1%)), #000 calc(100% - var(--edge, 0) * 14%), transparent),
+    linear-gradient(to right, transparent, #000 calc(var(--edge, 0) * 14%), #000 calc(100% - var(--edge, 0) * 14%), transparent);
+  mask-composite: intersect;
+}
+
+/*
+ * The light that stays: a round warm bulb, the size of SameLight's lamp glass,
+ * centred where that lamp hangs. It comes up as the light closes on it, so the
+ * scene ends on a light (not a patch of lit canvas), then the cut finds it cold.
+ * Outside the print, so the dark never takes it. .glued__bulb stays as it is:
+ * it is the glow that flickers on every snap.
+ */
+.glued__last {
+  position: absolute;
+  left: calc(var(--bulb-x) * 100%);
+  top: calc(var(--bulb-y) * 100%);
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border-radius: 50%;
+  background: radial-gradient(#ffe9c4, #f2a23a 45%, transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* over the light's last 0.4s (Glued.tsx IRIS is 1.2s) */
+.glued.is-leaving .glued__last {
+  opacity: 1;
+  transition: opacity 0.4s var(--ease-film) 0.8s;
+}
+
+/* the light the photo throws on the room, and the café's graze and shade on the print, go with the lights */
+.glued__frame .frame__glow,
+.glued__half::before,
+.glued__half::after {
+  transition: opacity 1.2s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.glued.is-leaving .glued__frame .frame__glow,
+.glued.is-leaving .glued__half::before,
+.glued.is-leaving .glued__half::after {
+  opacity: 0;
+}
+
+/* the line goes with the lights; Back stays, and the next scene keeps it */
+.glued.is-leaving .subs {
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-film);
+}
+
+.glued.is-leaving .glued__grip {
+  pointer-events: none;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glued__photo.is-pushing {
+    animation: none;
+  }
+
+  .glued__frame .frame__glow,
+  .glued__half::before,
+  .glued__half::after,
+  .glued.is-leaving .subs {
+    transition-duration: 0.45s;
+  }
+
+  /* the rest of the photo just fades (0.45s): the light comes up with it */
+  .glued.is-leaving .glued__last {
+    transition-duration: 0.45s;
+    transition-delay: 0s;
+  }
+}

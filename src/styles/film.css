@@ -1,0 +1,973 @@
+/* ───────────── the stage: one café at night ───────────── */
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+#root {
+  height: 100%;
+}
+
+/*
+ * The room: warm under the ceiling, a bounce off the table at the foot where
+ * the subtitles sit, the corners falling off like a lens. Every gradient is a
+ * light source falling off, never decoration.
+ *
+ * Two lights hang over it, and each scene says how much of them is on
+ * (the lighting plot, at the end of this file):
+ *   --room     the pool of light under the bulbs
+ *   --festoon  the café's string of bulbs, out of focus along the top edge
+ */
+.stage {
+  --room: 0.35;
+  --festoon: 0;
+  position: fixed;
+  inset: 0;
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
+  overflow: hidden;
+  background:
+    radial-gradient(140% 42% at 50% -6%, rgb(140 64 24 / 0.32), transparent 72%),
+    radial-gradient(130% 34% at 50% 106%, rgb(156 74 30 / 0.24), transparent 72%),
+    radial-gradient(150% 95% at 50% 42%, transparent 62%, rgb(8 4 2 / 0.22) 100%),
+    linear-gradient(180deg, #3a2214 0%, var(--stage) 46%, #21130c 100%);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/*
+ * Clip, not just hide: the glows spill past the frames, and a hidden overflow
+ * can still be scrolled by script (a focus() or scrollIntoView would slide the
+ * whole film sideways). Gated, because the minifier would otherwise drop the
+ * hidden fallback that iOS 15 needs.
+ */
+@supports (overflow: clip) {
+  .stage {
+    overflow: clip;
+  }
+}
+
+.stage::before,
+.stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 1.6s var(--ease-film);
+}
+
+/* the pool of light under the string: hot at the ceiling, gone by the middle of the room */
+.stage::before {
+  opacity: var(--room);
+  background:
+    radial-gradient(118% 32% at 50% -5%, rgb(255 184 104 / 0.42) 0%, rgb(234 124 48 / 0.24) 38%, rgb(150 60 20 / 0.1) 66%, transparent 92%),
+    radial-gradient(170% 54% at 50% -14%, rgb(170 76 28 / 0.2), transparent 74%),
+    radial-gradient(120% 26% at 50% 108%, rgb(150 70 30 / 0.12), transparent 72%);
+}
+
+/* the café string just above the frame, out of focus: the discs follow the wire's sag */
+.stage::after {
+  opacity: var(--festoon);
+  background:
+    radial-gradient(circle 24px at 3% 6px, rgb(255 236 190 / 0.74) 0%, rgb(255 196 112 / 0.6) 52%, rgb(246 150 56 / 0.22) 80%, rgb(240 140 50 / 0) 100%),
+    radial-gradient(circle 30px at 22% 30px, rgb(255 232 180 / 0.6) 0%, rgb(255 190 104 / 0.48) 52%, rgb(246 150 56 / 0.18) 80%, rgb(240 140 50 / 0) 100%),
+    radial-gradient(circle 22px at 41% 44px, rgb(255 240 200 / 0.84) 0%, rgb(255 200 118 / 0.66) 52%, rgb(246 150 56 / 0.26) 80%, rgb(240 140 50 / 0) 100%),
+    radial-gradient(circle 34px at 60% 38px, rgb(255 232 180 / 0.5) 0%, rgb(255 190 104 / 0.4) 52%, rgb(246 150 56 / 0.15) 80%, rgb(240 140 50 / 0) 100%),
+    radial-gradient(circle 24px at 79% 30px, rgb(255 236 190 / 0.74) 0%, rgb(255 196 112 / 0.6) 52%, rgb(246 150 56 / 0.22) 80%, rgb(240 140 50 / 0) 100%),
+    radial-gradient(circle 30px at 98% 6px, rgb(255 232 180 / 0.6) 0%, rgb(255 190 104 / 0.48) 52%, rgb(246 150 56 / 0.18) 80%, rgb(240 140 50 / 0) 100%),
+    radial-gradient(circle 70px at 22% 30px, rgb(255 150 60 / 0.1), transparent),
+    radial-gradient(circle 70px at 41% 44px, rgb(255 150 60 / 0.12), transparent),
+    radial-gradient(circle 70px at 60% 38px, rgb(255 150 60 / 0.1), transparent),
+    radial-gradient(circle 70px at 79% 30px, rgb(255 150 60 / 0.12), transparent);
+}
+
+/* a wide screen sees more of the string */
+@media (min-width: 700px) {
+  .stage::after {
+    background:
+      radial-gradient(circle 30px at 2% 4px, rgb(255 236 190 / 0.7) 0%, rgb(255 196 112 / 0.56) 52%, rgb(246 150 56 / 0.2) 80%, rgb(240 140 50 / 0) 100%),
+      radial-gradient(circle 38px at 12% 26px, rgb(255 232 180 / 0.56) 0%, rgb(255 190 104 / 0.44) 52%, rgb(246 150 56 / 0.16) 80%, rgb(240 140 50 / 0) 100%),
+      radial-gradient(circle 28px at 22% 44px, rgb(255 240 200 / 0.8) 0%, rgb(255 200 118 / 0.62) 52%, rgb(246 150 56 / 0.24) 80%, rgb(240 140 50 / 0) 100%),
+      radial-gradient(circle 42px at 33% 57px, rgb(255 232 180 / 0.46) 0%, rgb(255 190 104 / 0.36) 52%, rgb(246 150 56 / 0.14) 80%, rgb(240 140 50 / 0) 100%),
+      radial-gradient(circle 30px at 44% 64px, rgb(255 236 190 / 0.74) 0%, rgb(255 196 112 / 0.58) 52%, rgb(246 150 56 / 0.22) 80%, rgb(240 140 50 / 0) 100%),
+      radial-gradient(circle 36px at 56% 64px, rgb(255 232 180 / 0.56) 0%, rgb(255 190 104 / 0.44) 52%, rgb(246 150 56 / 0.16) 80%, rgb(240 140 50 / 0) 100%),
+      radial-gradient(circle 28px at 67% 57px, rgb(255 240 200 / 0.8) 0%, rgb(255 200 118 / 0.62) 52%, rgb(246 150 56 / 0.24) 80%, rgb(240 140 50 / 0) 100%),
+      radial-gradient(circle 40px at 78% 44px, rgb(255 232 180 / 0.5) 0%, rgb(255 190 104 / 0.4) 52%, rgb(246 150 56 / 0.15) 80%, rgb(240 140 50 / 0) 100%),
+      radial-gradient(circle 30px at 88% 26px, rgb(255 236 190 / 0.72) 0%, rgb(255 196 112 / 0.56) 52%, rgb(246 150 56 / 0.2) 80%, rgb(240 140 50 / 0) 100%),
+      radial-gradient(circle 36px at 98% 4px, rgb(255 232 180 / 0.56) 0%, rgb(255 190 104 / 0.44) 52%, rgb(246 150 56 / 0.16) 80%, rgb(240 140 50 / 0) 100%),
+      radial-gradient(90% 22% at 50% 0%, rgb(255 150 60 / 0.14), transparent 80%);
+  }
+}
+
+/* a breath of night air moves the string, barely (one composited transform; off with reduced motion) */
+@media (prefers-reduced-motion: no-preference) {
+  .stage::after {
+    left: -12px;
+    right: -12px;
+    animation: festoon-sway 9s ease-in-out infinite;
+  }
+}
+
+@keyframes festoon-sway {
+  0%,
+  100% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  50% {
+    transform: translate3d(4px, 1px, 0);
+  }
+}
+
+/* ───────────── scenes ───────────── */
+
+/* the scene she is watching sits on top; the one leaving can no longer be touched */
+.scene-wrap {
+  position: absolute;
+  inset: 0;
+}
+
+.scene-wrap[data-present='true'] {
+  z-index: 1;
+}
+
+/* it takes the keyboard focus when it arrives (so Tab goes on from there), but never shows a ring */
+.scene-wrap:focus {
+  outline: none;
+}
+
+.scene-wrap[data-present='false'] {
+  pointer-events: none;
+}
+
+/* its last line leaves at once, so it never tangles with the first line of the scene arriving */
+.scene-wrap[data-present='false'] .subs {
+  opacity: 0;
+  transition: opacity 0.12s linear;
+}
+
+/*
+ * Every scene shares one grid, so a photo sits in exactly the same
+ * place from one scene to the next (continuity between shots).
+ */
+.scene {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows:
+    calc(var(--safe-top) + clamp(0.5rem, 2.5vh, 1.5rem))
+    minmax(0, 1fr)
+    auto
+    calc(var(--bar-h) + var(--safe-bottom) + 0.5rem);
+  grid-template-columns: minmax(0, 1fr);
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+/* a scene's own practical light (the title's afterglow, the plane's reading light, the cut before the card) */
+.scene::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.4s var(--ease-film);
+}
+
+.scene__picture {
+  grid-row: 2;
+  position: relative;
+  container-type: size;
+  display: grid;
+  place-items: center;
+  max-height: 80dvh;
+  align-self: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* the 3:4 frame every photo lives in */
+.frame {
+  position: relative;
+  width: min(100cqw, 75cqh);
+  aspect-ratio: 3 / 4;
+}
+
+/*
+ * On tall phones the frame is narrower than the room above the subtitles.
+ * Sit it low, close to its subtitle like a film still, and leave the spare
+ * room above it to the café's lights. A shorter screen (Safari with its
+ * toolbars, Instagram's browser) still keeps a band for the string: the
+ * print gets a little smaller instead of covering the bulbs.
+ */
+.scene__picture > .frame {
+  align-self: end;
+  /* full bleed when the width allows it; otherwise a real print with at least 12px a side, never a sliver */
+  width: min(100cqw, 75cqh - 45px, max(100cqw - 24px, 100cqw + (75cqh - 45px - 100cqw) * 1000));
+  margin-bottom: max(0px, min(3.5rem, (100cqh - 133.333cqw) * 0.28));
+}
+
+/* a wide screen's string hangs lower (its middle bulbs reach 100px): a deeper band */
+@media (min-width: 700px) {
+  .scene__picture > .frame {
+    width: min(100cqw, 75cqh - 62px, max(100cqw - 24px, 100cqw + (75cqh - 62px - 100cqw) * 1000));
+  }
+}
+
+/*
+ * iOS 15 has no container units: without this the frame (whose children are
+ * all absolutely positioned) would shrink to nothing. The picture row is
+ * about the screen minus 11rem of title, subtitle and bar rows.
+ */
+@supports not (width: 1cqw) {
+  .frame,
+  .scene__picture > .frame {
+    /* dvh (iOS 15.4+): Safari's 100vh ignores its toolbars, and the print would cover the bulbs again */
+    width: min(100vw, (100vh - 11rem) * 0.75 - 45px);
+    width: min(100vw, (100dvh - 11rem) * 0.75 - 45px);
+  }
+}
+
+.frame__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/*
+ * The light a photo throws onto the room around it: its own 12px copy,
+ * stretched. The browser's upscaling does the blurring for free.
+ */
+.frame__glow {
+  position: absolute;
+  inset: -16%;
+  width: 132%;
+  height: 132%;
+  /* base.css caps images at 100%: the glow must spill past the frame on every side */
+  max-width: none;
+  object-fit: fill;
+  opacity: 0.6;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent);
+  mask-image: radial-gradient(closest-side, #000 55%, transparent);
+}
+
+/* prints under the bulbs: a warm graze on top, the foot and corners in shade, faces untouched */
+.frame:not(.plane__frame)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgb(255 186 110 / 0.1) 0%, rgb(255 186 110 / 0) 14%, transparent 68%, rgb(14 6 3 / 0.3) 100%),
+    radial-gradient(130% 90% at 50% 40%, transparent 62%, rgb(14 6 3 / 0.3) 100%);
+}
+
+.frame__clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.frame__img.is-pushing {
+  transform-origin: 50% 45%;
+  animation: push-in 14s linear forwards;
+}
+
+@keyframes push-in {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.045);
+  }
+}
+
+/* ───────────── subtitles ───────────── */
+
+.subs {
+  grid-row: 3;
+  position: relative;
+  min-height: calc(2 * 1.35 * var(--step-sub) + 1.25rem);
+  padding: 0.75rem var(--gutter) 0.25rem;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+/* on the narrowest phones a long line can take three rows: reserve them, so the picture never jumps */
+@media (max-width: 360px) {
+  .subs {
+    min-height: calc(3 * 1.35 * var(--step-sub) + 1.25rem);
+  }
+}
+
+.sub {
+  /* leaves room on both sides for the chevron that hangs off the end of a line, so it never meets the screen edge */
+  max-width: min(30ch, calc(100vw - 2 * var(--gutter) - 1.8em));
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--step-sub);
+  line-height: 1.35;
+  color: var(--sub);
+  text-wrap: balance;
+  text-shadow:
+    0 1px 1px rgb(10 5 2 / 0.95),
+    0 0 14px rgb(10 5 2 / 0.75);
+}
+
+/*
+ * "Tap for more": a small chevron after the line, once she has had a second
+ * to read it. Its negative right margin cancels its own width, so it hangs
+ * off the end of the line and never pushes a centred line off centre.
+ */
+.sub__more {
+  display: inline-block;
+  width: 0.42em;
+  height: 0.42em;
+  margin-left: 0.45em;
+  margin-right: -0.87em;
+  vertical-align: 0.12em;
+  border-top: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  opacity: 0;
+  animation:
+    sub-more-in 400ms ease 1.1s forwards,
+    sub-more-pulse 1.6s ease-in-out 1.5s infinite;
+}
+
+@keyframes sub-more-in {
+  to {
+    opacity: 0.55;
+  }
+}
+
+@keyframes sub-more-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    translate: 0 0;
+  }
+  50% {
+    opacity: 0.25;
+    translate: 2px 0;
+  }
+}
+
+.sub[data-tone='prompt'] {
+  color: var(--sand);
+  font-weight: 400;
+  font-size: var(--step-0);
+  letter-spacing: 0.01em;
+}
+
+/*
+ * The lines that matter most are not subtitles: they are said in the card's
+ * voice (a scene opts a line in by its beat id, see each scene's css).
+ */
+.sub--vow {
+  font-family: var(--font-title);
+  font-optical-sizing: auto;
+  font-style: italic;
+  font-weight: 330;
+  font-size: calc(var(--step-sub) * 1.6);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: var(--white);
+  text-shadow:
+    0 0 26px rgb(255 166 72 / 0.42),
+    0 1px 1px rgb(10 5 2 / 0.9);
+}
+
+.subs__live {
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+/* tap right to go on, left to read the previous line again (like stories) */
+.sub-tap {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  cursor: pointer;
+  border-radius: 12px;
+}
+
+.sub-tap--prev {
+  right: 70%;
+}
+
+.sub-tap--prev ~ .sub-tap--next {
+  left: 30%;
+}
+
+/* ───────────── bottom bar: everything she touches gives light ───────────── */
+
+.bar {
+  grid-row: 4;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.25rem var(--gutter) calc(var(--safe-bottom) + 0.5rem);
+}
+
+.bar__side {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 1.15rem;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    transform 160ms var(--ease-out),
+    background-color 200ms ease,
+    box-shadow 200ms ease,
+    color 200ms ease;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+/* the fallbacks (Play, Bring them together, Next day, Focus, Wipe it…): quiet, the gesture is the hero */
+.btn--ghost {
+  color: var(--sand);
+  font-weight: 400;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgb(214 180 139 / 0.26);
+}
+
+.btn--ghost:active {
+  color: var(--sub);
+  box-shadow:
+    inset 0 0 0 1px var(--tungsten),
+    0 0 22px -4px rgb(242 150 50 / 0.6);
+}
+
+/* Next: lit glass, not a loud pill. It only waits for her */
+.btn--next {
+  color: #ffe8c2;
+  font-weight: 500;
+  background: rgb(242 162 58 / 0.13);
+  box-shadow:
+    inset 0 0 0 1px rgb(242 162 58 / 0.6),
+    inset 0 1px 0 rgb(255 226 170 / 0.14),
+    0 0 24px -6px rgb(242 150 50 / 0.5);
+}
+
+.btn--next:active {
+  background: rgb(242 162 58 / 0.24);
+  box-shadow:
+    inset 0 0 0 1px var(--tungsten),
+    0 0 30px -4px rgb(242 150 50 / 0.75);
+}
+
+/* the one loud button of the film: Wink back (the credits' only .btn--next) */
+.credits .btn--next {
+  color: var(--ink);
+  font-weight: 600;
+  background: var(--tungsten);
+  box-shadow:
+    inset 0 1px 0 rgb(255 226 170 / 0.55),
+    0 8px 26px -8px rgb(242 150 50 / 0.65);
+}
+
+.credits .btn--next:active {
+  box-shadow:
+    inset 0 1px 0 rgb(255 226 170 / 0.55),
+    0 6px 30px -4px rgb(242 150 50 / 0.85);
+}
+
+/* on the poster the two choices are real choices: Watch again stays legible (the roll's quiet buttons stay quiet) */
+.credits.is-poster .btn--ghost {
+  color: var(--white);
+  font-weight: 500;
+  background: rgb(255 196 130 / 0.04);
+  box-shadow: inset 0 0 0 1px rgb(214 180 139 / 0.42);
+}
+
+.btn--text {
+  color: var(--sand);
+  padding: 0 0.6rem;
+  margin-left: -0.6rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn--ghost:hover {
+    color: var(--white);
+    box-shadow: inset 0 0 0 1px rgb(242 162 58 / 0.7);
+  }
+  .btn--next:hover {
+    background: rgb(242 162 58 / 0.22);
+  }
+  .credits .btn--next:hover {
+    background: #f7b252;
+  }
+  .btn--text:hover {
+    color: var(--white);
+  }
+}
+
+/* ───────────── type ───────────── */
+
+.title-serif {
+  font-family: var(--font-title);
+  font-optical-sizing: auto;
+  font-weight: 350;
+  color: var(--white);
+  line-height: 1.05;
+}
+
+.caption {
+  font-family: var(--font-title);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--step--1);
+  line-height: 1.3;
+  color: var(--sand);
+}
+
+[lang='vi'] {
+  line-height: 1.35;
+}
+
+/* ───────────── progress: a filament, hottest at its tip ───────────── */
+
+.progress {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  z-index: 30;
+  pointer-events: none;
+  background: rgb(255 210 160 / 0.05);
+  transition: opacity 0.6s var(--ease-film);
+}
+
+.progress__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7a3a10, var(--tungsten) 70%, #ffe1a6);
+  opacity: 0.95;
+  box-shadow: 0 0 8px rgb(242 150 50 / 0.55);
+  transform-origin: left center;
+  transition: transform 900ms var(--ease-film);
+}
+
+/* ───────────── guards ───────────── */
+
+.upright {
+  display: none;
+}
+
+@media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
+  .upright {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+    background: var(--night);
+    color: var(--sand);
+    font-family: var(--font-title);
+    font-style: italic;
+    font-size: 1.25rem;
+    text-align: center;
+  }
+}
+
+/*
+ * A cut never whites out the phone: the flash is a bulb flaring, falling off
+ * to nothing at the edges, never above ~0.75. Each scene places its bulb.
+ */
+.flash {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+  background: radial-gradient(80% 56% at 50% 46%, #ffe2a8 0%, #ffc66e 18%, rgb(246 168 80 / 0.82) 42%, rgb(150 66 22 / 0.42) 72%, rgb(30 12 5 / 0) 100%);
+  opacity: 0;
+}
+
+/*
+ * ───────────── the lamp: the café bulb of the week's string (week.css), held in the opening and at the peak ─────────────
+ * Lamp.tsx draws the socket, the filament, its glows and the reflection; the
+ * scene's anchor (.lights__lamp, .samelight__lamp) draws the glass (::before)
+ * and the wire (::after). The anchor sits on the centre of the 34px glass.
+ */
+
+.lamp {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/*
+ * Its light on the room: three fixed gradients (ember, amber, gold) that
+ * Lamp.tsx crossfades while the whole halo grows out of the glass. Only
+ * opacity and scale change, so the phone never repaints 280px of gradient
+ * under her finger. The scale stays at 1 or below, so nothing is re-rasterised.
+ */
+.lamp__halo {
+  position: absolute;
+  width: 340px;
+  height: 340px;
+  left: -170px;
+  top: -170px;
+  will-change: transform;
+}
+
+.lamp__light {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  will-change: opacity;
+}
+
+/* light falling off like a real bulb's (bright at the glass, a long soft tail), never a disc with a rim */
+.lamp__light--ember {
+  background: radial-gradient(
+    closest-side,
+    rgb(107 45 11 / 0.55),
+    rgb(107 45 11 / 0.36) 16%,
+    rgb(107 45 11 / 0.2) 36%,
+    rgb(107 45 11 / 0.08) 60%,
+    rgb(107 45 11 / 0.02) 82%,
+    rgb(107 45 11 / 0)
+  );
+}
+
+.lamp__light--amber {
+  background: radial-gradient(
+    closest-side,
+    rgb(234 140 26 / 0.5),
+    rgb(234 140 26 / 0.33) 16%,
+    rgb(234 140 26 / 0.18) 36%,
+    rgb(234 140 26 / 0.07) 60%,
+    rgb(234 140 26 / 0.02) 82%,
+    rgb(234 140 26 / 0)
+  );
+}
+
+.lamp__light--gold {
+  background: radial-gradient(
+    closest-side,
+    rgb(255 186 96 / 0.55),
+    rgb(255 186 96 / 0.36) 16%,
+    rgb(255 186 96 / 0.2) 36%,
+    rgb(255 186 96 / 0.08) 60%,
+    rgb(255 186 96 / 0.02) 82%,
+    rgb(255 186 96 / 0)
+  );
+}
+
+/* the socket: a short dark cylinder, its domed top moulded round the wire (week.css .week__cap) */
+.lamp__cap {
+  position: absolute;
+  left: -7px;
+  top: -33px;
+  width: 14px;
+  height: 16px;
+  border-radius: 45% 45% 1.5px 1.5px / 32% 32% 1.5px 1.5px;
+  background: linear-gradient(90deg, #0b0807 0%, #2f2620 34%, #171210 66%, #080606 100%);
+}
+
+/* a seam where the dome meets the cylinder */
+.lamp__cap::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 38%;
+  height: 1px;
+  background: linear-gradient(90deg, rgb(0 0 0 / 0), rgb(0 0 0 / 0.55) 30%, rgb(0 0 0 / 0.55) 70%, rgb(0 0 0 / 0));
+}
+
+/* the bulb's brass collar, where the glass begins */
+.lamp__cap::after {
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -1.5px;
+  height: 2.5px;
+  border-radius: 0 0 1px 1px;
+  background: linear-gradient(90deg, #1a140d, #6a5236 40%, #2a2016 75%, #120d09);
+}
+
+/* as the bulb comes on, the underside of its socket catches the light */
+.lamp__cap-lit {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(to top, rgb(255 206 132 / 0.7), rgb(255 206 132 / 0) 80%);
+}
+
+/* everything inside the glass, on the anchor's 34px globe */
+.lamp__globe {
+  position: absolute;
+  left: -17px;
+  top: -17px;
+  width: 34px;
+  height: 34px;
+}
+
+.lamp__ember,
+.lamp__glow,
+.lamp__lit,
+.lamp__spec {
+  position: absolute;
+  border-radius: 50%;
+}
+
+/* the cold filament's faint ember (the week's next bulb waits the same way), then the first orange of the heat */
+.lamp__ember {
+  inset: 0;
+  background: radial-gradient(circle at 50% 44%, rgb(242 130 42 / 0.8), rgb(150 60 16 / 0.42) 30%, rgb(107 45 11 / 0) 58%);
+  will-change: opacity;
+}
+
+/* the filament heating up: a gold glow held close round the coil, the smoky glass still dark at its rim */
+.lamp__glow {
+  inset: 0;
+  background: radial-gradient(circle at 50% 43%, rgb(255 222 160 / 0.9) 0%, rgb(252 178 80 / 0.5) 15%, rgb(236 132 40 / 0.18) 34%, rgb(236 132 40 / 0) 56%);
+  will-change: opacity;
+}
+
+/* the filament and its two supports (week.css .week__filament) */
+.lamp__filament {
+  position: absolute;
+  left: 30%;
+  top: 22%;
+  width: 40%;
+  height: 40%;
+  overflow: visible;
+}
+
+.lamp__filament path {
+  fill: none;
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* cold, it is only metal catching the room */
+.lamp__filament--cold path {
+  stroke: rgb(200 160 110 / 0.45);
+}
+
+/* the same wire glowing (Lamp.tsx gives it the colour of the heat), a touch thicker... */
+.lamp__filament--hot path {
+  stroke-width: 1.3;
+}
+
+/* ...with its light blooming along it: a wide, faint copy of the stroke (no filter) */
+.lamp__filament--hot .lamp__bloom {
+  stroke-width: 3.4;
+  opacity: 0.32;
+}
+
+/* above ~0.7 the whole glass fills with light: warm white at the core, amber at the edge (week.css .week__lit) */
+.lamp__lit {
+  inset: 0;
+  background: radial-gradient(circle at 50% 46%, #ffffff 0%, #fffaf0 9%, #fff0cc 24%, #ffd27a 48%, #f4af4c 68%, #e2952c 85%, #b8701c 100%);
+  box-shadow:
+    inset 0 -2px 4px rgb(150 74 8 / 0.3),
+    0 0 6px 1px rgb(255 214 140 / 0.55),
+    0 0 18px 4px rgb(234 154 26 / 0.32);
+  will-change: opacity;
+}
+
+/* the reflection on the glass, lit or not */
+.lamp__spec {
+  left: 19%;
+  top: 12%;
+  width: 34%;
+  height: 22%;
+  transform: rotate(-32deg);
+  background: radial-gradient(closest-side, rgb(249 244 220 / 0.55), rgb(249 244 220 / 0));
+}
+
+/* smoky glass, the room caught on its rim (it is there from the first frame: Glued cuts straight onto it) */
+.lights__lamp::before,
+.samelight__lamp::before {
+  content: '';
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  left: -17px;
+  top: -17px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 47%, rgb(40 22 12 / 0.3) 0%, rgb(22 12 7 / 0.55) 56%, rgb(104 70 46 / 0.6) 88%, rgb(214 172 128 / 0.45) 100%);
+  box-shadow:
+    inset 0 0 0 0.6px rgb(222 182 136 / 0.3),
+    0 2px 6px rgb(10 5 2 / 0.5);
+}
+
+/* the wire it hangs from, fading up into the dark, its end inside the socket's dome */
+.lights__lamp::after,
+.samelight__lamp::after {
+  content: '';
+  position: absolute;
+  width: 1.4px;
+  height: 113px;
+  left: -0.7px;
+  top: -144px;
+  background: linear-gradient(to top, #120a06 0%, rgb(18 10 6 / 0) 100%);
+}
+
+@keyframes lamp-ember {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame__img.is-pushing {
+    animation: none;
+  }
+}
+
+/*
+ * ───────────── the lighting plot ─────────────
+ * Her gestures switch the room's lights; the 1.6s crossfades carry each cut
+ * like a lighting cue. App.tsx names the current scene on the stage
+ * (data-scene), so a scene that is leaving never holds the lights.
+ * The states inside a scene need :has() (iOS 15.4+); without it each scene
+ * keeps its base level, which is still a warm café.
+ */
+
+/* 1. a dark café and one cold bulb; her finger warms the room; the title keeps the light she made */
+.stage[data-scene='lights'] {
+  --room: 0.32;
+}
+.stage[data-scene='lights']:has(.lights__stage):not(:has(.lights__breath)) {
+  --room: 0.5;
+}
+.stage[data-scene='lights']:has(.scene.lights .lights__title) {
+  --room: 0.58;
+}
+
+/* 2. two kids, two homes, a softer light; the match cut switches the café's bulbs on */
+.stage[data-scene='sofas'] {
+  --room: 0.62;
+}
+.stage[data-scene='sofas']:has(.scene.sofas [data-phase='cut']) {
+  --room: 0.72;
+  --festoon: 1;
+}
+
+/* 3. the week: the string is the only light, and every bulb she lights brings the room up a step */
+.stage[data-scene='week'] {
+  --room: 0.14;
+}
+.stage[data-scene='week']:has(.week__stage[data-lit='1']) {
+  --room: 0.22;
+}
+.stage[data-scene='week']:has(.week__stage[data-lit='2']) {
+  --room: 0.3;
+}
+.stage[data-scene='week']:has(.week__stage[data-lit='3']) {
+  --room: 0.38;
+}
+.stage[data-scene='week']:has(.week__stage[data-lit='4']) {
+  --room: 0.45;
+}
+.stage[data-scene='week']:has(.week__stage[data-lit='5']) {
+  --room: 0.52;
+}
+.stage[data-scene='week']:has(.week__stage[data-lit='6']) {
+  --room: 0.58;
+}
+.stage[data-scene='week']:has(.scene.week .week__stage.is-done) {
+  --room: 0.64;
+}
+
+/* 4. back to Friday night, at the café */
+.stage[data-scene='friday'] {
+  --room: 0.72;
+  --festoon: 1;
+}
+
+/* 5. the plane: the café is gone, one reading light above the seat (plane.css) */
+.stage[data-scene='plane'] {
+  --room: 0;
+  --festoon: 0;
+}
+
+/* 6. 10,000 km, still glued: the café again. When she goes on, the lights go out except one bulb */
+.stage[data-scene='glued'] {
+  --room: 0.66;
+  --festoon: 0.9;
+}
+.stage[data-scene='glued']:has(.scene.glued.is-leaving) {
+  --room: 0.2;
+  --festoon: 0;
+}
+
+/* 7. the same light: dark until she holds the bulb, the café comes back around it, then a hard cut for the card */
+.stage[data-scene='light'] {
+  --room: 0.2;
+}
+.stage[data-scene='light']:has(.samelight__stage.is-holdable):not(:has(.samelight__breath)) {
+  --room: 0.42;
+}
+.stage[data-scene='light']:has(.scene.samelight .samelight__frame.is-lit) {
+  --room: 0.72;
+  --festoon: 1;
+}
+.stage[data-scene='light']:has(.scene.samelight):not(:has(.samelight__frame)) {
+  --room: 0;
+  --festoon: 0;
+}
+.stage[data-scene='light']:has(.scene.samelight):not(:has(.samelight__frame))::before,
+.stage[data-scene='light']:has(.scene.samelight):not(:has(.samelight__frame))::after {
+  transition-duration: 0.12s;
+}
+/* the hard cut is the film's one truly dark moment: even the progress filament goes out */
+.stage[data-scene='light']:has(.scene.samelight):not(:has(.samelight__frame)) .progress {
+  opacity: 0;
+  transition-duration: 0.12s;
+}
+
+/* 8. credits: house lights down for the roll, the café's bulbs back on over the poster */
+.stage[data-scene='credits'] {
+  --room: 0.32;
+}
+.stage[data-scene='credits']:has(.scene.credits.is-poster) {
+  --room: 0.7;
+  --festoon: 0.85;
+}

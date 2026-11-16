@@ -1,0 +1,377 @@
+/*
+ * Scene 3, "Week": six café bulbs on a wire, one for each day.
+ * Week.tsx lays the string out and sets the sizes: --d (globe),
+ * --cap and --cap-w (socket), --halo (the light around a lit bulb).
+ * The room rises one step per bulb she lights: film.css reads
+ * .week__stage[data-lit] and .week__stage.is-done (the lighting plot).
+ */
+
+.week__stage {
+  /* the wire: a warm near-black, darker than the room, so it reads as a line against the light */
+  --wire: #0c0604;
+  touch-action: manipulation;
+  cursor: pointer;
+  outline-offset: -8px;
+}
+
+.week__stage.is-done {
+  cursor: default;
+}
+
+.week__stage:focus-visible {
+  outline: 2px solid var(--tungsten);
+  outline-offset: -8px;
+  border-radius: 12px;
+}
+
+.week__string {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* ───────────── the warmth of the string ───────────── */
+
+.week__spill,
+.week__glow,
+.week__bloom {
+  position: absolute;
+  border-radius: 50%;
+}
+
+/* the string's light falling into the room under it, where the day's name hangs: faint, and gone before the subtitles */
+.week__spill {
+  background: radial-gradient(
+    closest-side,
+    rgb(200 98 34 / 0.15) 0%,
+    rgb(184 86 30 / 0.11) 30%,
+    rgb(160 70 26 / 0.06) 56%,
+    rgb(140 60 22 / 0.02) 80%,
+    rgb(140 60 22 / 0) 100%
+  );
+}
+
+/* the warmth of the whole string: a rich amber, falling off smoothly, never in rings */
+.week__glow {
+  background: radial-gradient(
+    closest-side,
+    rgb(240 150 50 / 0.34) 0%,
+    rgb(236 140 48 / 0.27) 18%,
+    rgb(214 112 40 / 0.18) 38%,
+    rgb(180 84 30 / 0.09) 58%,
+    rgb(160 70 26 / 0.03) 78%,
+    rgb(160 70 26 / 0) 100%
+  );
+}
+
+/* the one swell when the whole week is lit */
+.week__bloom {
+  background: radial-gradient(
+    closest-side,
+    rgb(255 222 168 / 0.34) 0%,
+    rgb(255 210 140 / 0.27) 20%,
+    rgb(240 170 80 / 0.16) 42%,
+    rgb(234 154 26 / 0.07) 64%,
+    rgb(234 154 26 / 0.02) 84%,
+    rgb(234 154 26 / 0) 100%
+  );
+}
+
+/* ───────────── the wire ───────────── */
+
+.week__wire {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+.week__wire path {
+  fill: none;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* set here, not as attributes: not every WebKit reads var() in an SVG attribute */
+.week__wire stop {
+  stop-color: var(--wire);
+}
+
+/* ───────────── a bulb ───────────── */
+
+/* the point where the socket clips onto the wire: the bulb swings around it */
+.week__pivot {
+  position: absolute;
+  width: 0;
+  height: 0;
+  transform-origin: 0 0;
+}
+
+/* its light on the room, centred on the glass */
+.week__halo {
+  position: absolute;
+  left: calc(var(--halo) / -2);
+  top: calc(var(--cap) - 1px + var(--d) / 2 - var(--halo) / 2);
+  width: var(--halo);
+  height: var(--halo);
+  border-radius: 50%;
+  /* bright close to the glass, then a long faint tail (roughly inverse-square) */
+  background: radial-gradient(
+    closest-side,
+    rgb(255 240 210 / 0.62) 0%,
+    rgb(255 214 140 / 0.36) 9%,
+    rgb(250 186 92 / 0.2) 20%,
+    rgb(234 154 26 / 0.1) 36%,
+    rgb(234 154 26 / 0.045) 56%,
+    rgb(234 154 26 / 0.015) 78%,
+    rgb(234 154 26 / 0) 100%
+  );
+}
+
+/* the socket: a short dark cylinder, its domed top moulded round the wire */
+.week__cap {
+  position: absolute;
+  left: calc(var(--cap-w) / -2);
+  top: -3px;
+  width: var(--cap-w);
+  height: calc(var(--cap) + 2px);
+  border-radius: 45% 45% 1.5px 1.5px / 32% 32% 1.5px 1.5px;
+  background: linear-gradient(90deg, #0b0807 0%, #2f2620 34%, #171210 66%, #080606 100%);
+}
+
+/* a seam where the dome meets the cylinder */
+.week__cap::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 38%;
+  height: 1px;
+  background: linear-gradient(90deg, rgb(0 0 0 / 0), rgb(0 0 0 / 0.55) 30%, rgb(0 0 0 / 0.55) 70%, rgb(0 0 0 / 0));
+}
+
+/* the bulb's brass collar, where the glass begins */
+.week__cap::after {
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -1.5px;
+  height: 2.5px;
+  border-radius: 0 0 1px 1px;
+  background: linear-gradient(90deg, #1a140d, #6a5236 40%, #2a2016 75%, #120d09);
+}
+
+/* once the bulb is on, the underside of its socket catches the light */
+.week__cap-lit {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(to top, rgb(255 206 132 / 0.7), rgb(255 206 132 / 0) 80%);
+}
+
+.week__globe {
+  position: absolute;
+  left: calc(var(--d) / -2);
+  top: calc(var(--cap) - 1px);
+  width: var(--d);
+  height: var(--d);
+}
+
+.week__glass,
+.week__ember,
+.week__dim,
+.week__lit,
+.week__spec {
+  position: absolute;
+  border-radius: 50%;
+}
+
+/* off: dark smoky glass, the room's amber caught on its rim */
+.week__glass {
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 46%,
+    rgb(34 20 12 / 0.86) 0%,
+    rgb(17 10 6 / 0.92) 56%,
+    rgb(88 60 40 / 0.86) 86%,
+    rgb(196 156 116 / 0.55) 100%
+  );
+  box-shadow:
+    inset 0 0 0 0.6px rgb(222 176 124 / 0.3),
+    0 1px 3px rgb(0 0 0 / 0.4);
+}
+
+/* the filament and its two supports, faint through the glass */
+.week__filament {
+  position: absolute;
+  left: 30%;
+  top: 22%;
+  width: 40%;
+  height: 40%;
+  overflow: visible;
+}
+
+.week__filament path {
+  fill: none;
+  stroke: rgb(200 160 110 / 0.45);
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* the next bulb waits with its filament faintly warm, like the lamp at the start */
+.week__ember {
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(
+    circle at 50% 44%,
+    rgb(234 120 40 / 0.7),
+    rgb(107 45 11 / 0.35) 30%,
+    rgb(107 45 11 / 0) 58%
+  );
+}
+
+.week__bulb.is-next .week__ember {
+  opacity: 0.6;
+  animation: week-ember 2.4s ease-in-out infinite;
+}
+
+@keyframes week-ember {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* half power (Thursday, until "I wish..."): a dimmed filament burns orange, never pale */
+.week__dim {
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 46%,
+    #ffc477 0%,
+    #f7a043 20%,
+    #de7d24 46%,
+    #ad5612 74%,
+    #6b2d0b 100%
+  );
+  box-shadow:
+    inset 0 -2px 4px rgb(90 36 6 / 0.4),
+    0 0 10px 1px rgb(236 130 40 / 0.4);
+}
+
+/* on: warm white at the core, amber at the edge of the glass */
+.week__lit {
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 46%,
+    #ffffff 0%,
+    #fffaf0 9%,
+    #fff0cc 24%,
+    #ffd27a 48%,
+    #f4af4c 68%,
+    #e2952c 85%,
+    #b8701c 100%
+  );
+  /* thicker glass at the edge runs amber, a little deeper underneath */
+  box-shadow:
+    inset 0 -2px 4px rgb(150 74 8 / 0.3),
+    0 0 6px 1px rgb(255 214 140 / 0.55),
+    0 0 18px 4px rgb(234 154 26 / 0.32);
+  will-change: opacity;
+}
+
+/* the reflection on the glass, lit or not */
+.week__spec {
+  left: 19%;
+  top: 12%;
+  width: 34%;
+  height: 22%;
+  transform: rotate(-32deg);
+  background: radial-gradient(closest-side, rgb(249 244 220 / 0.55), rgb(249 244 220 / 0));
+}
+
+/* until the first one is lit, Monday breathes: "touch me" */
+.week__breath {
+  position: absolute;
+  left: calc(var(--d) * -0.8);
+  top: calc(var(--cap) - 1px - var(--d) * 0.3);
+  width: calc(var(--d) * 1.6);
+  height: calc(var(--d) * 1.6);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgb(242 162 58 / 0.45);
+  animation: week-breath 2.8s var(--ease-out) infinite;
+}
+
+@keyframes week-breath {
+  0% {
+    transform: scale(0.55);
+    opacity: 0;
+  }
+  35% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+/* ───────────── the days ───────────── */
+
+/* brighter ink than a caption, so an unlit day (Week.tsx dims it to NAME_OFF) still reads on the dark room */
+.week__day {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: clamp(0.875rem, 0.8rem + 0.3vw, 1.0625rem);
+  line-height: 1.2;
+  color: #efd6b0;
+  text-shadow: 0 1px 2px rgb(10 5 2 / 0.7);
+}
+
+/* ───────────── the chapter: the day being told, large in the room under the string ───────────── */
+
+/* Week.tsx sets its top under the day names; the title sits in the middle of what is left */
+.week__chapter {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+/* the outgoing day and the incoming one share one place (the incoming one only comes up once the other has gone) */
+.week__title {
+  grid-area: 1 / 1;
+  font-family: var(--font-title);
+  font-optical-sizing: auto;
+  font-style: italic;
+  font-weight: 320;
+  font-size: clamp(2.75rem, 1.9rem + 4.4vw, 4.75rem);
+  line-height: 1.15;
+  letter-spacing: 0.005em;
+  white-space: nowrap;
+  color: var(--white);
+  /* lit by the string above it: a soft warm halo, and a contact shadow so it never floats */
+  text-shadow:
+    0 0 34px rgb(255 166 72 / 0.38),
+    0 0 12px rgb(255 190 110 / 0.16),
+    0 1px 1px rgb(10 5 2 / 0.85);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .week__bulb.is-next .week__ember {
+    animation: none;
+    opacity: 0.55;
+  }
+
+  .week__breath {
+    display: none;
+  }
+}

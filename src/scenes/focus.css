@@ -1,0 +1,128 @@
+/*
+ * Focus: the café photo starts blurry. The blurred copy (a small image the
+ * browser upscales softly) sits over the sharp one; focusing is only ever
+ * an opacity change between them, never a live blur.
+ */
+
+/* the out-of-focus copies, stacked over the sharp photo */
+.focus__soft {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.focus__layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/*
+ * The whole frame is the tap target. Nothing here drags, so it keeps the
+ * default touch handling (manipulation only drops the double-tap zoom wait).
+ */
+.focus__hit {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  touch-action: manipulation;
+}
+
+.focus__hit[data-live] {
+  cursor: crosshair;
+}
+
+.focus__hit:focus-visible {
+  outline: 2px solid var(--tungsten);
+  outline-offset: -2px;
+  border-radius: 0;
+}
+
+/* in focus: just a photo now, nothing to press (the keyboard moves on to Next at the end) */
+.focus__hit:not([data-live]):focus-visible {
+  outline: none;
+}
+
+/* the camera's focus square: four tungsten corners, no fill */
+.focus__square {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  width: var(--focus-square);
+  height: var(--focus-square);
+  margin: calc(var(--focus-square) / -2) 0 0 calc(var(--focus-square) / -2);
+  color: var(--tungsten);
+  pointer-events: none;
+}
+
+.focus__pulse {
+  width: 100%;
+  height: 100%;
+}
+
+.focus__marks {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.focus__marks path {
+  fill: none;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+
+/* a warm espresso underlay, never a cold black, so the corners read on her bright skin */
+.focus__marks-under {
+  stroke: rgb(16 7 3 / 0.36);
+  stroke-width: 3.5;
+}
+
+.focus__marks-line {
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+/*
+ * The hint (where to tap, after a quiet while) sits on her blurred, lavender
+ * cheek, where tungsten melts in: paler corners, a little heavier, on a
+ * deeper underlay (still a 1px rim each side).
+ */
+.focus__square--hint {
+  color: var(--sub);
+}
+
+.focus__square--hint .focus__marks-under {
+  stroke: rgb(16 7 3 / 0.55);
+  stroke-width: 4;
+}
+
+.focus__square--hint .focus__marks-line {
+  stroke-width: 2;
+}
+
+/* after focus: a slow push-in toward where their heads touch */
+.focus__frame.is-pushing .frame__img {
+  transform-origin: var(--push-origin, 69% 50%);
+  animation: focus-push 12s cubic-bezier(0.37, 0, 0.63, 1) forwards;
+}
+
+@keyframes focus-push {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .focus__frame.is-pushing .frame__img {
+    animation: none;
+  }
+}

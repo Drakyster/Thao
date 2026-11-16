@@ -1,0 +1,245 @@
+/*
+ * Fireflies (đom đóm): warm motes drifting slowly up through the dark (Fireflies.tsx).
+ *
+ * Each mote is one small layer with two CSS animations of the same length, its life: its path
+ * (transform: a slow rise, a soft sway from side to side, ten points sampled from that curve) and
+ * its light (opacity: it fades in, blinks a few times, fades out, and the path starts again from
+ * where it was born while it is dark). Only transform and opacity change, so the compositor
+ * flies it without drawing anything again; and one long loop per mote keeps the main thread out of
+ * it too (every loop that ends is an event the page has to hear).
+ *
+ * Fireflies.tsx sets, per mote:
+ *   --ff-size        the glow, across (px)         --ff-core   the hot core, across (px)
+ *   --ff-hot         the core's colour (r g b)     --ff-warm   the glow's colour (r g b)
+ *   --ff-x1..10, --ff-y1..10   the points of its path, from where it was born (px; up is negative)
+ *   --ff-life        one life (s)                  --ff-life-at   its start (s; negative: already flying)
+ */
+
+.fireflies {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* centred on its point: a hot core and the light it throws, falling off softly (never a disc with a rim) */
+.firefly {
+  position: absolute;
+  width: var(--ff-size);
+  height: var(--ff-size);
+  margin: calc(var(--ff-size) / -2) 0 0 calc(var(--ff-size) / -2);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle closest-side,
+    rgb(var(--ff-hot) / 1) 0,
+    rgb(var(--ff-hot) / 0.94) calc(var(--ff-core) / 2),
+    rgb(var(--ff-warm) / 0.66) calc(var(--ff-core) / 2 + 1.5px),
+    rgb(var(--ff-warm) / 0.3) 46%,
+    rgb(var(--ff-warm) / 0.11) 72%,
+    rgb(var(--ff-warm) / 0) 100%
+  );
+  opacity: 0;
+  animation:
+    firefly-path var(--ff-life) linear var(--ff-life-at) infinite both,
+    firefly-glow var(--ff-life) ease-in-out var(--ff-life-at) infinite both;
+}
+
+/* the small sharp ones, in focus: a brighter point, a tighter glow */
+.firefly--sharp {
+  background: radial-gradient(
+    circle closest-side,
+    rgb(var(--ff-hot) / 1) 0,
+    rgb(var(--ff-hot) / 0.96) calc(var(--ff-core) / 2),
+    rgb(var(--ff-warm) / 0.7) calc(var(--ff-core) / 2 + 1px),
+    rgb(var(--ff-warm) / 0.24) 48%,
+    rgb(var(--ff-warm) / 0.07) 76%,
+    rgb(var(--ff-warm) / 0) 100%
+  );
+}
+
+/* the large ones out of focus (bokeh): no point at all, a dim soft disc */
+.firefly--bokeh {
+  background: radial-gradient(
+    circle closest-side,
+    rgb(var(--ff-warm) / 0.44) 0,
+    rgb(var(--ff-warm) / 0.38) 40%,
+    rgb(var(--ff-warm) / 0.16) 72%,
+    rgb(var(--ff-warm) / 0) 100%
+  );
+}
+
+/* three ways to blink, so no two motes ever pulse alike */
+.firefly--pulse {
+  animation-name: firefly-path, firefly-pulse;
+}
+
+.firefly--flicker {
+  animation-name: firefly-path, firefly-flicker;
+}
+
+/* its path: ten points sampled from a slow rise with a soft sway (Fireflies.tsx), straight from one to the next */
+@keyframes firefly-path {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  10% {
+    transform: translate3d(var(--ff-x1), var(--ff-y1), 0);
+  }
+  20% {
+    transform: translate3d(var(--ff-x2), var(--ff-y2), 0);
+  }
+  30% {
+    transform: translate3d(var(--ff-x3), var(--ff-y3), 0);
+  }
+  40% {
+    transform: translate3d(var(--ff-x4), var(--ff-y4), 0);
+  }
+  50% {
+    transform: translate3d(var(--ff-x5), var(--ff-y5), 0);
+  }
+  60% {
+    transform: translate3d(var(--ff-x6), var(--ff-y6), 0);
+  }
+  70% {
+    transform: translate3d(var(--ff-x7), var(--ff-y7), 0);
+  }
+  80% {
+    transform: translate3d(var(--ff-x8), var(--ff-y8), 0);
+  }
+  90% {
+    transform: translate3d(var(--ff-x9), var(--ff-y9), 0);
+  }
+  100% {
+    transform: translate3d(var(--ff-x10), var(--ff-y10), 0);
+  }
+}
+
+/* slow swells, a long dark between them */
+@keyframes firefly-glow {
+  0% {
+    opacity: 0;
+  }
+  7% {
+    opacity: 0.75;
+  }
+  19% {
+    opacity: 0.2;
+  }
+  31% {
+    opacity: 0.9;
+  }
+  42% {
+    opacity: 0.55;
+  }
+  51% {
+    opacity: 0.15;
+  }
+  62% {
+    opacity: 0.85;
+  }
+  73% {
+    opacity: 0.3;
+  }
+  84% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* two blinks close together, then dark a while */
+@keyframes firefly-pulse {
+  0% {
+    opacity: 0;
+  }
+  6% {
+    opacity: 0.8;
+  }
+  9.5% {
+    opacity: 0.25;
+  }
+  13% {
+    opacity: 0.85;
+  }
+  24% {
+    opacity: 0.15;
+  }
+  39% {
+    opacity: 0.2;
+  }
+  43% {
+    opacity: 0.9;
+  }
+  47% {
+    opacity: 0.3;
+  }
+  51% {
+    opacity: 0.85;
+  }
+  63% {
+    opacity: 0.15;
+  }
+  74% {
+    opacity: 0.2;
+  }
+  78% {
+    opacity: 0.9;
+  }
+  82% {
+    opacity: 0.3;
+  }
+  87% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* barely breathing (the bokeh, and a few others) */
+@keyframes firefly-flicker {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.7;
+  }
+  25% {
+    opacity: 0.42;
+  }
+  40% {
+    opacity: 0.85;
+  }
+  57% {
+    opacity: 0.48;
+  }
+  73% {
+    opacity: 0.82;
+  }
+  88% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/*
+ * Reduced motion: nothing flies. Eight of them stay where they were born, faint and still, like
+ * lights far off in the night (the warmth of the scene stays, the movement goes).
+ */
+@media (prefers-reduced-motion: reduce) {
+  /* (as specific as the blink kinds above, so it wins over them too) */
+  .fireflies .firefly {
+    animation: none;
+    opacity: 0.4;
+  }
+
+  .fireflies .firefly--bokeh {
+    opacity: 0.6;
+  }
+
+  .fireflies .firefly:not([data-still]) {
+    display: none;
+  }
+}

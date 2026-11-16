@@ -1,0 +1,278 @@
+/*
+ * Scene "plane": a cabin window on the night. The café's lights are off (the
+ * lighting plot in film.css); the only light is the reading light above the
+ * seat. Warm inside, cold outside: the night beyond the glass is the film's
+ * one cool colour. Outside, the city falls away; on the glass, fog and drops
+ * (a canvas, painted warm in Plane.tsx) that she wipes off with her finger.
+ * The window's proportions come from Plane.tsx as custom properties.
+ */
+
+/* the reading light above the seat, falling down the cabin wall onto the window; warmer once she has cleared it */
+.scene.plane::before {
+  opacity: 0.8;
+  background:
+    radial-gradient(80% 40% at 50% -4%, rgb(255 180 100 / 0.34), rgb(234 124 48 / 0.12) 48%, transparent 80%),
+    radial-gradient(90% 44% at 50% 46%, rgb(220 120 50 / 0.1), transparent 72%);
+}
+
+.scene.plane:has(.plane__fog.is-lifted)::before {
+  opacity: 1;
+  transition-duration: 2.4s;
+}
+
+.plane__frame {
+  /* where the sky meets the ground, as a share of the pane (also HORIZON in Plane.tsx) */
+  --horizon: 58%;
+  /* cream cabin plastic in that one warm light: in shade up top, catching it below */
+  --shade: #31231a;
+  --plastic: #564435;
+  --lit: #937a62;
+}
+
+/* ───────────── the bezel ───────────── */
+
+/*
+ * The surround is the cabin wall curving in toward the glass. Lit from
+ * above, its upper half faces down (in shade) and its lower half faces up
+ * (catching the light), and its outer lip takes a thin highlight on top.
+ */
+.plane__window {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--win-w);
+  aspect-ratio: var(--win-ratio);
+  transform: translate(-50%, -50%);
+  border-radius: var(--win-rx) / var(--win-ry);
+  background:
+    radial-gradient(110% 46% at 50% -4%, rgb(214 180 139 / 0.12), transparent 76%),
+    linear-gradient(to bottom, var(--shade), var(--plastic) 56%, var(--lit));
+  box-shadow:
+    inset 0 1.5px 0.5px rgb(255 226 186 / 0.2),
+    inset 0 -1px 0.5px rgb(0 0 0 / 0.4),
+    0 0 0 1px rgb(0 0 0 / 0.35),
+    0 10px 30px -6px rgb(0 0 0 / 0.55);
+  outline-offset: 6px;
+}
+
+/* the whole window is the wiping surface while there is fog on it (with a mouse: a fingertip ring) */
+.plane__window[data-live] {
+  touch-action: none;
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Ccircle cx='14' cy='14' r='11' fill='none' stroke='%23fcefd9' stroke-opacity='0.8' stroke-width='1.5'/%3E%3C/svg%3E")
+      14 14,
+    grab;
+}
+
+/* clear: just a window now, nothing to press */
+.plane__window:not([data-live]):focus-visible {
+  outline: none;
+}
+
+/* ───────────── the pane ───────────── */
+
+.plane__pane {
+  position: absolute;
+  inset: var(--pane-y) var(--pane-x);
+  border-radius: var(--pane-rx) / var(--pane-ry);
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--night);
+  /*
+   * Where the surround meets the glass: the gasket, the thin inner frame
+   * around the pane (its lower edge catching the light, its upper edge in
+   * shade), the deep shade under the upper lip, and the light caught by the
+   * lower slope.
+   */
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.85),
+    0 0 0 4.5px #3b2c21,
+    0 1px 0 4.5px #b29c84,
+    0 -1px 0 4.5px rgb(0 0 0 / 0.55),
+    0 0 0 5.5px rgb(0 0 0 / 0.3),
+    0 -6px 14px 3px rgb(0 0 0 / 0.42),
+    0 10px 18px -2px rgb(214 180 139 / 0.1);
+}
+
+.plane__night,
+.plane__sky,
+.plane__far,
+.plane__sheen,
+.plane__fog,
+.plane__glass,
+.plane__rim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/*
+ * Outside: the film's one cool light, a lifted indigo night over the city's
+ * warm haze, so every stroke she wipes opens onto sky and lights, never a dark bar.
+ */
+.plane__sky {
+  background:
+    radial-gradient(130% 34% at 50% var(--horizon), rgb(240 156 104 / 0.36), transparent 72%),
+    radial-gradient(150% 60% at 50% 112%, rgb(236 150 100 / 0.16), transparent 70%),
+    linear-gradient(
+      to bottom,
+      #171b36 0%,
+      #20254a 34%,
+      #353660 calc(var(--horizon) - 5%),
+      #7c4c4c var(--horizon),
+      #3b2730 calc(var(--horizon) + 3%),
+      #261b25 100%
+    );
+}
+
+/*
+ * The near city: groups of lights that drift down and fade in turn, as if the
+ * plane were climbing away from it. They start just under the horizon and
+ * reach past the bottom of the pane, so nothing pops in or out of view.
+ */
+.plane__city {
+  position: absolute;
+  left: 0;
+  top: calc(var(--horizon) + 1%);
+  width: 100%;
+  height: 50%;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: plane-drift 16s linear infinite;
+}
+
+@keyframes plane-drift {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -3%, 0) scale(1.015);
+  }
+  22% {
+    opacity: 1;
+  }
+  62% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-2%, 17%, 0) scale(0.985);
+  }
+}
+
+/* the beacon under the wing, just out of sight: a faint red pulse every 1.4s */
+.plane__beacon {
+  position: absolute;
+  left: -14%;
+  bottom: -12%;
+  width: 62%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 52 36 / 0.4), rgb(255 40 30 / 0.12) 45%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  animation: plane-beacon 1.4s linear infinite;
+}
+
+@keyframes plane-beacon {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  5% {
+    opacity: 0.85;
+  }
+  24% {
+    opacity: 0;
+  }
+}
+
+/* the glass itself: a faint reflection, only seen where it is clear */
+.plane__sheen {
+  background: linear-gradient(
+    114deg,
+    transparent 32%,
+    rgb(252 239 217 / 0.04) 44%,
+    rgb(252 239 217 / 0.015) 50%,
+    transparent 58%
+  );
+}
+
+/* ───────────── the fog ───────────── */
+
+.plane__fog {
+  transition: opacity 600ms var(--ease-out);
+}
+
+/* enough is clear: the rest lifts */
+.plane__fog.is-lifted {
+  opacity: 0;
+}
+
+/* the drop that runs down: its own small layer, moved with a transform */
+.plane__tear {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform;
+  transition: opacity 160ms ease-out;
+}
+
+/*
+ * Her own words (content.ts plane.herMessage, only if he filled it in), small
+ * on the clear glass in the sky above the horizon, after his last line.
+ */
+.plane__message {
+  position: absolute;
+  left: 50%;
+  top: 25%;
+  width: 78%;
+  translate: -50% -50%;
+  font-family: var(--font-title);
+  font-optical-sizing: auto;
+  font-style: italic;
+  font-weight: 360;
+  font-size: clamp(0.9375rem, 0.86rem + 0.35vw, 1.125rem);
+  line-height: 1.3;
+  letter-spacing: 0.005em;
+  color: var(--white);
+  text-align: center;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+  text-shadow:
+    0 1px 2px rgb(10 5 2 / 0.7),
+    0 0 18px rgb(255 166 72 / 0.22);
+  quotes: '\201C' '\201D';
+  pointer-events: none;
+}
+
+.plane__message::before {
+  content: open-quote;
+}
+
+.plane__message::after {
+  content: close-quote;
+}
+
+/* the edge of the pane, on top of everything: the gasket, and the bezel's shadow on the glass */
+.plane__rim {
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 0.85),
+    inset 0 9px 14px -6px rgb(0 0 0 / 0.75),
+    inset 0 0 24px rgb(0 0 0 / 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plane__city {
+    animation: none;
+    opacity: 0.8;
+  }
+
+  .plane__beacon {
+    display: none;
+  }
+}
