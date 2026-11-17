@@ -3,13 +3,14 @@
  * bulb under their umbrella was (Glued cuts straight onto it). She holds it:
  * it lights with a flare and stays lit, the café comes back on around it,
  * fireflies come out, and he says it, line by line, big in the middle of the
- * room. Then a hard cut to warm black, and "Anh yêu em." under one bulb's glow.
+ * room. Then the room goes out slowly round "I love you.", and "Anh yêu em."
+ * comes up out of the dark under one bulb's glow.
  *
  * The lighting plot at the end of film.css reads this scene's hooks:
- * .samelight__stage.is-holdable, .samelight__breath, .samelight__frame.is-lit,
- * and the frame unmounting at the cut. So the shared 3:4 frame stays, empty
- * and invisible, from her arrival to the cut: the lamp hangs on it, at the
- * umbrella bulb's spot.
+ * .samelight__stage.is-holdable, .samelight__breath, .samelight__frame.is-lit
+ * and .scene.samelight.is-fading. The shared 3:4 frame stays, empty and
+ * invisible, from her arrival until the room has gone out: the lamp hangs on
+ * it, at the umbrella bulb's spot.
  *
  * SameLight.tsx sets --ember-at on the frame: the bulb in the ember's box
  * (it overhangs the frame by 30% on every side).
@@ -393,15 +394,41 @@
   border-radius: 12px;
 }
 
-/* ───────────── the cut: the café goes to warm black at once (the one deliberately dark moment of the film)... ───────────── */
+/* ───────────── the end: the room goes out slowly round "I love you." (the one deliberately dark moment of the film)... ───────────── */
 
+/*
+ * Never all at once, and in this order: the fireflies, the bulb's bloom and
+ * its glints, the light on the wall and the café (film.css), the bulb itself
+ * (SameLight.tsx cools it as it warmed), and last the words. Everything has
+ * gone by 2.8 s; SameLight.tsx takes it off the page at 3 s.
+ */
 .scene.samelight::before {
   background: rgb(13 7 5 / 0.62);
 }
 
-.scene.samelight.is-cut::before {
+.scene.samelight.is-fading::before {
   opacity: 1;
-  transition-duration: 0.12s;
+  transition: opacity 2.6s var(--ease-dim);
+}
+
+.samelight.is-fading .fireflies {
+  opacity: 0;
+  transition: opacity 2s var(--ease-dim);
+}
+
+.samelight.is-fading .samelight__over {
+  opacity: 0;
+  transition: opacity 2s var(--ease-dim) 0.2s;
+}
+
+.samelight.is-fading .samelight__pool {
+  opacity: 0;
+  transition: opacity 2.4s var(--ease-dim);
+}
+
+.samelight.is-fading .samelight__words {
+  opacity: 0;
+  transition: opacity 2s var(--ease-dim) 0.8s;
 }
 
 /* ───────────── ...then the title card, under one bulb's worth of warm light ───────────── */

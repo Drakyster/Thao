@@ -70,6 +70,14 @@ const MOODS: Record<string, Mood> = {
   credits: { pad: 0.75, keys: 0.75, sparkle: true },
 }
 const SILENCE: Mood = { pad: 0, keys: 0 }
+/**
+ * The dark after "I love you.": no keys, a low pad, a little darker (never a
+ * sudden silence). Not much darker: a phone's speaker barely plays the pad's
+ * fundamentals, only the harmonics the filter lets through.
+ */
+const BREATH: Mood = { pad: 0.25, keys: 0, cutoff: 850 }
+/** "Anh yêu em.": the same pad, a little warmer, on the chord of D */
+const CARD: Mood = { pad: 0.32, keys: 0 }
 /** the opening when she comes back to it (Watch again, or Back): a quiet pad until the bulb blooms */
 const AGAIN: Mood = { pad: 0.3, keys: 0 }
 
@@ -83,7 +91,7 @@ const CUE_SCENE: Record<Cue, string> = {
   clear: 'plane',
   leave: 'glued',
   lit: 'light',
-  cut: 'light',
+  fade: 'light',
   card: 'light',
   poster: 'credits',
 }
@@ -235,7 +243,7 @@ export class Score {
       return b
     }
 
-    // master: the buses → a highpass (nothing under 28 Hz) → the fader (the cut, the poster's rest) → mute → compressor
+    // master: the buses → a highpass (nothing under 28 Hz) → the fader (the poster's rest) → mute → compressor
     const mix = gain(TRIM)
     this.fader = gain(1)
     this.muter = gain(1)
@@ -363,16 +371,18 @@ export class Score {
       case 'lit':
         this.setMood({ pad: 0.8, keys: 0.55 }, at, { pad: 2.5 / 3, enter: 0 })
         break
-      case 'cut':
-        // the cut to black is silent: gone within 30 ms (a 7 ms fade, so not a click)
-        glide(this.fader.gain, 0, at, 0.007)
-        this.fader.gain.setValueAtTime(0, at + 0.05)
-        this.setMood(SILENCE, at + 0.05, { pad: 0.01, keys: 0.01 })
+      case 'fade':
+        // the room goes out round "I love you." and the music goes with it, never all at once: the keys
+        // let go over a couple of seconds, the pad sinks and darkens to a breath, and the breath
+        // carries on through the dark
+        this.setMood(BREATH, at, { pad: 1.1, keys: 0.85 })
         break
       case 'card':
-        glide(this.fader.gain, 1, at, 0.02)
-        ring(74, 0.06, 0.62, { decay: 4.5, index: 1.6 })
-        this.setMood({ pad: 0.25, keys: 0 }, at, { pad: 1 })
+        // "Anh yêu em.": the pad comes home to D, whatever chord the dark was on, and one low bell
+        // rings as the words come up (they are about half there by then)
+        this.home(at)
+        ring(74, 0.3, 0.55, { decay: 4.5, index: 1.6 })
+        this.setMood(CARD, at, { pad: 1.2 })
         break
       case 'poster':
         if (!quiet) this.swell(1.15, at, 4)
@@ -529,6 +539,23 @@ export class Score {
     const p = this.ctx.createStereoPanner()
     p.pan.value = x
     return p
+  }
+
+  /**
+   * The pad comes home: the chord of D from `at` (crossfaded, like every
+   * change), whatever chord the loop was on, and the loop's clock moves with
+   * it, so D lasts its full two bars and the loop goes on from there. Only
+   * when the keys are silent (it moves their grid too).
+   */
+  private home(at: number) {
+    if (!this.running) return
+    const n = CHORDS.length
+    const there = this.chordK >= 0 && this.chordK % n === 0
+    const k = there ? this.chordK : Math.ceil((this.chordK + 1) / n) * n
+    // chord k now starts at `at` (its bar line PAD_LEAD later, as always), and the eighths count from there
+    this.t0 = at + PAD_LEAD - k * CHORD_S
+    this.step = Math.ceil((at - this.t0) / EIGHTH - 1e-9)
+    if (!there) this.chordOn(k, at)
   }
 
   /** the pad: two saws ±7 cents per note, a sine an octave under the two lowest; slow in, slow out */

@@ -6,6 +6,8 @@ export const ease = {
   inOut: [0.77, 0, 0.175, 1] as const,
   /** slow, cinematic reveals (light coming up, paper settling) */
   film: [0.22, 0.61, 0.36, 1] as const,
+  /** a light going out by hand, like a dimmer: it starts gently and lingers at the end */
+  dim: [0.45, 0.05, 0.4, 1] as const,
 }
 
 export const spring = {

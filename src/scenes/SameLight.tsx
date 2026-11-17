@@ -36,8 +36,17 @@ const FRAME_VARS = {
 /** The face that sets "Anh yêu em." (the ê must never flash in a fallback font). */
 const CARD_FONT = 'italic 300 64px "Newsreader Variable"'
 const FONT_TIMEOUT_MS = 2500
-/** Black between the hard cut and the card: long enough to feel the dark. */
-const BLACK_MS = 1400
+/**
+ * After "I love you." the room goes out round the words, never all at once
+ * (samelight.css times each part; the words go last, at 2.8 s). After this
+ * long (ms) nothing of it is left, and it leaves the page.
+ */
+const FADE_MS = 3000
+/** then the dark holds a moment before the card comes up */
+const BLACK_MS = 800
+/** the bulb cools as it warmed (white, gold, amber, an ember), then the ember goes (s) */
+const COOL = { delay: 0.3, duration: 2.2 }
+const EMBER_OUT = { delay: 1.5, duration: 1.2 }
 /** the flare's peak: a bulb flaring, never a white-out */
 const FLARE = 0.7
 /** how far a line rises as it comes up (px) */
@@ -103,12 +112,15 @@ const BEATS: Beat[] = [
     if (k === 0) return [{ id: 'name', say, vow: true, minMs: 1500, ms: Math.max(2400, readingMs(say)) }]
     return [{ say }]
   }),
-  // hard cut to black; the scene moves on once the black has held and the card's font is in
-  { id: 'cut', wait: 'gesture' },
+  // the room goes out round "I love you."; the scene moves on once the dark has held and the card's font is in
+  { id: 'fade', wait: 'gesture' },
   { id: 'card', ms: 3000 },
   ...(t.accents ? [{ id: 'accents', ms: 1600 } satisfies Beat] : []),
   { id: 'end', wait: 'end' },
 ]
+
+/** "I love you." (it stays on while the room goes out) */
+const LOVE_I = BEATS.findIndex((b) => b.id === 'love')
 
 let cardFont: Promise<unknown> | undefined
 /** Starts loading the card's italic once (on mount), so it is long ready by the end. */
@@ -144,7 +156,7 @@ function useCueOnce(name: Cue, now: boolean) {
 
 /**
  * One side of her taps while he speaks, with Subtitles' own rules (the lines
- * are not in the subtitle row here). If it goes (the hush, the cut) while the
+ * are not in the subtitle row here). If it goes (the hush, the fade) while the
  * keyboard is on it, the keyboard goes back to the picture, never to the page:
  * the cleanup runs before the button leaves the page.
  */
@@ -173,7 +185,8 @@ function Tap({
  * Scene 7, the peak: the lamp from the opening comes back where the bulb under
  * their umbrella was, and she switches it on again. This time it stays on: the
  * café comes back around it, fireflies come out, and he says it plainly, line
- * by line, big in the middle of the room. Then a hard cut, and "Anh yêu em."
+ * by line, big in the middle of the room. Then the room goes out slowly round
+ * "I love you.", and "Anh yêu em." comes up out of the dark.
  *
  * No fade here relies on the scene's own mount animation: things stay mounted
  * with `initial={false}` and state-driven `animate`, or are driven from
@@ -193,26 +206,30 @@ export default function SameLight() {
   const lit = lamp.state === 'lit'
   const hushed = seq.reached('hush')
   const love = seq.reached('love')
-  const cut = seq.reached('cut')
-  const atCut = seq.at('cut')
+  const fading = seq.reached('fade')
+  const atFade = seq.at('fade')
   const card = seq.reached('card')
   const accents = seq.reached('accents')
   const end = seq.reached('end')
   const next = seq.next
   const sideways = useSideways()
   const visible = useSyncExternalStore(onVisibility, pageVisible, () => true)
+  /** the room has gone out: nothing of it is left on screen */
+  const [dark, setDark] = useState(false)
 
-  // his lines, from "Thao." to "I love you.": big in the middle of the room, not in the subtitle row
-  const speaking = lit && seq.reached('name') && !cut
-  const beat = seq.beat
-  const said = speaking ? beat?.say : undefined
-  const isLove = beat?.id === 'love'
-  const tappable = !!said && beat?.wait !== 'gesture' && beat?.wait !== 'end'
+  // his lines, from "Thao." to "I love you.": big in the middle of the room, not in the subtitle row.
+  // "I love you." stays on while the room goes out round it (her taps are gone by then)
+  const speaking = lit && seq.reached('name') && !fading
+  const shownI = fading ? LOVE_I : seq.i
+  const shown = lit && seq.reached('name') && !dark ? BEATS[shownI] : undefined
+  const said = shown?.say
+  const isLove = shown?.id === 'love'
+  const tappable = speaking && !!said && shown?.wait !== 'gesture' && shown?.wait !== 'end'
 
   // the score's three moments here: the bulb lights (her hold or the fallback),
-  // the hard cut to black, and "Anh yêu em." starting to come up
+  // the room starts to go out, and "Anh yêu em." starts to come up
   useCueOnce('lit', lit)
-  useCueOnce('cut', cut)
+  useCueOnce('fade', fading)
   useCueOnce('card', card)
 
   // fetch the card's font while she looks at the dark
@@ -236,10 +253,24 @@ export default function SameLight() {
     if (lamp.hint && seq.at('hold')) seq.jump('keep')
   }, [lamp.hint, seq])
 
-  // the hard cut: hold the black, and only bring the card up once its font is in. She must see it
-  // come up: while she is in another app or the phone is on its side the black waits, then starts over
+  // the room goes out round "I love you.": the bulb cools as it warmed and its ember goes (the rest is
+  // timed in samelight.css); once nothing of it is left, it leaves the page
   useEffect(() => {
-    if (!atCut || sideways || !visible) return
+    if (!fading) return
+    const cool = animate(lamp.heat, 0, { ...COOL, ease: ease.dim })
+    const out = animate(lampOpacity, 0, { ...EMBER_OUT, ease: ease.dim })
+    const gone = window.setTimeout(() => setDark(true), FADE_MS)
+    return () => {
+      cool.stop()
+      out.stop()
+      window.clearTimeout(gone)
+    }
+  }, [fading, lamp.heat, lampOpacity])
+
+  // then the dark holds, and the card only comes up once its font is in. She must see it come up:
+  // while she is in another app or the phone is on its side the dark waits, then starts over
+  useEffect(() => {
+    if (!atFade || !dark || sideways || !visible) return
     let live = true
     const fontOrGiveUp = Promise.race([loadCardFont(), sleep(FONT_TIMEOUT_MS)])
     Promise.all([sleep(BLACK_MS), fontOrGiveUp]).then(() => {
@@ -248,7 +279,7 @@ export default function SameLight() {
     return () => {
       live = false
     }
-  }, [atCut, next, sideways, visible])
+  }, [atFade, dark, next, sideways, visible])
 
   // where the lamp hangs in the picture, for the fireflies that come out round it, and where his words go
   const picture = useRef<HTMLDivElement>(null)
@@ -285,10 +316,10 @@ export default function SameLight() {
   const holdProps = hold ? { role: 'button', tabIndex: 0, 'aria-label': t.prompt, ...lamp.bind } : { tabIndex: -1 }
 
   return (
-    <section className={`scene samelight${cut ? ' is-cut' : ''}`} aria-label={SCENE_LABEL}>
+    <section className={`scene samelight${fading ? ' is-fading' : ''}`} aria-label={SCENE_LABEL}>
       <div ref={picture} className={`scene__picture samelight__stage${hold ? ' is-holdable' : ''}`} {...holdProps}>
-        {/* everything of the lit room goes at once on the cut, in the same frame (the café goes dark with it) */}
-        {!cut ? (
+        {/* the lit room: after "I love you." it goes out slowly with the café (samelight.css), then leaves the page */}
+        {!dark ? (
           <>
             {/* the bulb's light on the room behind his words */}
             <div
@@ -348,10 +379,10 @@ export default function SameLight() {
               <AnimatePresence mode="wait" initial={false}>
                 {said ? (
                   <motion.p
-                    key={`${seq.i}:${said}`}
-                    className={`samelight__line${beat?.vow ? ' is-vow' : ''}${isLove ? ' is-love' : ''}`}
-                    data-beat={beat?.id}
-                    lang={beat?.lang}
+                    key={`${shownI}:${said}`}
+                    className={`samelight__line${shown?.vow ? ' is-vow' : ''}${isLove ? ' is-love' : ''}`}
+                    data-beat={shown?.id}
+                    lang={shown?.lang}
                     initial={{ opacity: 0, y: reduce ? 0 : RISE }}
                     animate={{ opacity: 1, y: 0, transition: { duration: 0.9, ease: ease.film } }}
                     exit={{ opacity: 0, transition: { duration: 0.35, ease: 'easeIn' } }}
@@ -363,7 +394,7 @@ export default function SameLight() {
                     ) : null}
                     <span className="samelight__say">{keepLastTwo(said)}</span>
                     {/* a quiet "tap for more", once she has had a second to read (never after a vow) */}
-                    {tappable && !beat?.vow ? <span className="samelight__more" aria-hidden="true" /> : null}
+                    {tappable && !shown?.vow ? <span className="samelight__more" aria-hidden="true" /> : null}
                     {isLove ? <Glints list={WORD_GLINTS} /> : null}
                   </motion.p>
                 ) : null}
@@ -387,7 +418,7 @@ export default function SameLight() {
                 marginRight: card || reduce ? '-0.02em' : '-0.06em',
               }}
               transition={{
-                opacity: { duration: 1.2, ease: ease.film },
+                opacity: { duration: 1.6, ease: ease.film },
                 letterSpacing: { duration: 2.4, ease: ease.out },
                 marginRight: { duration: 2.4, ease: ease.out },
               }}
@@ -418,7 +449,7 @@ export default function SameLight() {
       ) : null}
 
       {/* the subtitle row keeps her prompts; his lines are in the middle of the room */}
-      <Subtitles seq={seq} hidden={cut || (played && hold) || seq.reached('name')} />
+      <Subtitles seq={seq} hidden={(played && hold) || seq.reached('name')} />
 
       {/*
         The fallback waits (late) so she tries the lamp first, comes at once

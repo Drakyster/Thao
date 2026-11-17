@@ -16,7 +16,7 @@ fin de `src/styles/film.css`.
 | 4 | `#friday` | Retour au vendredi soir : elle fait la mise au point sur elle. « There you are. » |
 | 5 | `#plane` | Samedi, l'aéroport puis l'avion. Une goutte coule sur « I cried ». Elle essuie la buée du hublot, et derrière il y a la nuit. |
 | 6 | `#glued` | 10 000 km entre vous : elle essaie de séparer la photo, impossible. « Dính như sam. » Puis tout s'éteint, sauf l'ampoule du parasol. |
-| 7 | `#light` | Elle rallume cette ampoule et la lumière se répand dans la photo. « I love you. » Noir. « Anh yêu em. » |
+| 7 | `#light` | Elle rallume cette ampoule, le café revient autour et des lucioles sortent. Il le dit, ligne par ligne, jusqu'à « I love you. ». La pièce s'éteint doucement, puis « Anh yêu em. » |
 | 8 | `#credits` | Générique, puis l'affiche du film à garder (un tap sur l'affiche cache tout le reste, pour une capture propre), et « Wink back ;) ». |
 
 ## Modifier les textes
@@ -48,7 +48,8 @@ un fond chaud, lent. Il n'y a aucun fichier audio et rien qui soit sous licence.
 
 - Elle commence doucement quand elle lâche la première ampoule, parce que les navigateurs
   n'autorisent le son qu'après un geste.
-- Elle suit le film : plus mince dans l'avion, un silence net à la coupe avant « Anh yêu em. ».
+- Elle suit le film : plus mince dans l'avion. Après « I love you. », elle s'éteint doucement avec la
+  lumière, sans jamais s'arrêter net, et revient sur l'accord de ré avec « Anh yêu em. ».
   Chaque ampoule de la semaine a sa note.
 - Un petit bouton en haut à droite coupe le son, et le téléphone se souvient de son choix.
 - Sur iPhone, elle joue même en mode silencieux, comme le son d'une vidéo. Le volume est celui

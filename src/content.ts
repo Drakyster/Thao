@@ -92,10 +92,10 @@ export const copy = {
   sofas: {
     hisCaption: 'Me, 2009.\nDressed for a\u00a0wedding.',
     herCaption: 'You. Already winking?',
-    lines: ['You had your life. I had mine.', "We didn't even know each other existed."],
-    prompt: 'Drag them together.',
-    action: 'Bring them together',
-    after: [`Years later, in ${place}, we finally met.`, 'And from the very first day, everything felt easy with you.'],
+    lines: ['Two kids, each living their own little life.', 'Neither of us knew the\u00a0other existed. Not yet.'],
+    prompt: 'Slide us together.',
+    action: 'Bring us together',
+    after: [`Then, years later, in\u00a0${place}, I\u00a0met you.`, 'And from the very first day, everything felt so natural with you.'],
   },
 
   /**
@@ -104,25 +104,34 @@ export const copy = {
    * (`note` is the first one, kept for a one-line summary).
    */
   week: {
-    lead: 'After that, we\u00a0saw each\u00a0other every\u00a0single\u00a0day.',
+    lead: 'From then on, we\u00a0saw each\u00a0other every\u00a0single\u00a0day.',
     prompt: 'Tap to light up each day.',
     action: 'Next day',
     /** the same button while a day still has a line to tell */
     actionMore: 'And then?',
     days: [
       day('Monday', 'Mon', [
-        'Our first date. A\u00a0Vietnamese restaurant.',
-        'I was so nervous, I dropped my meat on the floor.',
-        "Then cocktails. That's when I really got to know you.",
+        'Our first date, at\u00a0a\u00a0Vietnamese restaurant.',
+        'I was so nervous that I\u00a0dropped my meat on the floor.',
+        'Then we went for cocktails, and I really got to know you.',
       ]),
-      day('Tuesday', 'Tue', ["I couldn't stop smiling. Because of you."]),
+      day('Tuesday', 'Tue', ["I couldn't stop smiling, all because of you."]),
       day('Wednesday', 'Wed', ["It already felt like I'd\u00a0known\u00a0you\u00a0forever."]),
       day('Thursday', 'Thu', [
-        'A little Vietnamese café, before I had to go meet my friends.',
+        'We had a Vietnamese coffee together.',
+        'But then I had to leave to meet my friends.',
         'Honestly, I wish I had stayed with you instead.',
       ]),
-      day('Friday', 'Fri', ['Our last night.']),
-      day('Saturday', 'Sat', ['Lunch\u00a0together, one last time.']),
+      day('Friday', 'Fri', [
+        'We had xiao\u00a0long\u00a0bao, then\u00a0went back to the\u00a0apartment.',
+        'That evening, we went out again to grab a\u00a0coffee.',
+        'It was our last night.',
+      ]),
+      day('Saturday', 'Sat', [
+        'We went to a\u00a0crab\u00a0restaurant for lunch.',
+        'Then we spent the rest of the day together.',
+        'Until the very last minute.',
+      ]),
     ],
     end: "Six days. I'd\u00a0live every\u00a0one\u00a0of\u00a0them\u00a0again.",
   },
@@ -176,15 +185,17 @@ export const copy = {
     action: 'Turn it on',
     lines: [
       `${config.herName}.`,
-      "I didn't expect to meet you.",
-      "And I didn't expect to fall for you so fast.",
+      'I never expected to meet someone like you.',
+      'Or to fall for you so fast.',
       ...(config.currentlyApart
         ? [
             'I miss you.',
             'I miss everything about you.',
             'Your laugh, that wink, the\u00a0way\u00a0you\u00a0love\u00a0life.',
+            "I can't wait to see you again.",
           ]
         : []),
+      'Thank you for those six days.',
       "I'm so happy I met you.",
       'I love you.',
     ],

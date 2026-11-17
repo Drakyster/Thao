@@ -19,7 +19,7 @@ export type Cue =
   | 'clear' // #plane: the fog lifts ("Thanks. I needed that.")
   | 'leave' // #glued: the café's lights go out, all but one bulb
   | 'lit' // #light: the bulb lights again and the light spreads
-  | 'cut' // #light: the hard cut to black after "I love you."
+  | 'fade' // #light: after "I love you." the room goes out slowly, and the score sinks to a breath
   | 'card' // #light: "Anh yêu em." appears
   | 'poster' // #credits: the poster appears
 

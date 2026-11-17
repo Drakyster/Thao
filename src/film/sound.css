@@ -65,11 +65,11 @@
   border-radius: 50%;
 }
 
-/* the hard cut to black is the film's one truly dark moment: the button goes out with the filament */
-.stage[data-scene='light']:has(.scene.samelight):not(:has(.samelight__frame)) .sound-toggle {
+/* after "I love you." the film's one truly dark moment: the button goes out with the café and the filament */
+.stage[data-scene='light']:has(.scene.samelight.is-fading) .sound-toggle {
   opacity: 0;
   pointer-events: none;
-  transition-duration: 0.12s;
+  transition-duration: 1.2s;
 }
 
 /* the clean keepsake: nothing but the poster on the screenshot */

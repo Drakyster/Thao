@@ -468,7 +468,7 @@ body {
   transform: scale(0.97);
 }
 
-/* the fallbacks (Play, Bring them together, Next day, Focus, Wipe it…): quiet, the gesture is the hero */
+/* the fallbacks (Play, Bring us together, Next day, Focus, Wipe it…): quiet, the gesture is the hero */
 .btn--ghost {
   color: var(--sand);
   font-weight: 400;
@@ -950,29 +950,30 @@ body {
   --festoon: 0;
 }
 
-/* 7. the same light: dark until she holds the bulb, the café comes back around it, then a hard cut for the card */
+/* 7. the same light: dark until she holds the bulb, the café comes back around it, then it goes out slowly for the card */
 .stage[data-scene='light'] {
   --room: 0.2;
 }
 .stage[data-scene='light']:has(.samelight__stage.is-holdable):not(:has(.samelight__breath)) {
   --room: 0.42;
 }
-.stage[data-scene='light']:has(.scene.samelight .samelight__frame.is-lit) {
+.stage[data-scene='light']:has(.scene.samelight:not(.is-fading) .samelight__frame.is-lit) {
   --room: 0.72;
   --festoon: 1;
 }
-.stage[data-scene='light']:has(.scene.samelight):not(:has(.samelight__frame)) {
+/* after "I love you." the café goes out round the words, never all at once, and stays dark for the card */
+.stage[data-scene='light']:has(.scene.samelight.is-fading) {
   --room: 0;
   --festoon: 0;
 }
-.stage[data-scene='light']:has(.scene.samelight):not(:has(.samelight__frame))::before,
-.stage[data-scene='light']:has(.scene.samelight):not(:has(.samelight__frame))::after {
-  transition-duration: 0.12s;
+.stage[data-scene='light']:has(.scene.samelight.is-fading)::before,
+.stage[data-scene='light']:has(.scene.samelight.is-fading)::after {
+  transition: opacity 2.4s var(--ease-dim);
 }
-/* the hard cut is the film's one truly dark moment: even the progress filament goes out */
-.stage[data-scene='light']:has(.scene.samelight):not(:has(.samelight__frame)) .progress {
+/* the film's one truly dark moment: even the progress filament goes out */
+.stage[data-scene='light']:has(.scene.samelight.is-fading) .progress {
   opacity: 0;
-  transition-duration: 0.12s;
+  transition-duration: 1.2s;
 }
 
 /* 8. credits: house lights down for the roll, the café's bulbs back on over the poster */
